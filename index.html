@@ -1663,7 +1663,7 @@ $('#toEditBtn').onclick = () => { if (!S.clips.length) { toast('الأرشيف �
 
 /* ================= remote transport: only this module knows Supabase ================= */
 const remote = (() => {
-  let client, channel, room='', role='', connected=false, peers=[], generation=0, sdkPromise;
+  let client, channel, room='', role='', connected=false, peers=[], generation=0, sdkPromise, userId;
   const listeners = new Map();
   const self = crypto.randomUUID();
   const emit = (e,p) => (listeners.get(e)||[]).forEach(fn => Promise.resolve().then(()=>fn(p)).catch(console.error));
@@ -1679,7 +1679,7 @@ const remote = (() => {
     }).catch(e=>{sdkPromise=null;throw e;});
     await sdkPromise;
     if (!client) client=window.supabase.createClient(DUBLAJ.supabaseUrl,DUBLAJ.supabaseAnonKey,{
-      auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},
+      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false},
       global:{fetch:async(input,options={})=>{
         const controller=new AbortController(),cancel=()=>controller.abort();
         if(options.signal?.aborted)cancel();
@@ -1698,6 +1698,10 @@ const remote = (() => {
   async function open(code,kind) {
     if (!/^[ABCDEFGHJKMNPQRSTUVWXYZ]{4}$/.test(code)) throw new Error('Bad room');
     await close(); await ready(); room=code;role=kind;const gen=++generation;
+    const session=await client.auth.getSession();
+    const auth=session.data.session ? {data:{user:session.data.session.user}} : await client.auth.signInAnonymously();
+    if(auth.error || !auth.data.user)throw auth.error||new Error('Temporary sign-in unavailable');
+    userId=auth.data.user.id;
     return new Promise((resolve,reject)=>{
       let settled=false;
       const timer=setTimeout(()=>{if(!settled){settled=true;reject(new Error('Room connection timeout'));close();}},12000);
@@ -1736,12 +1740,19 @@ const remote = (() => {
     ready,open,close,send,
     on(e,fn){listeners.set(e,[...(listeners.get(e)||[]),fn]);},
     online(id){return connected && peers.some(p=>!id||p.id===id);},
-    async upload(path,blob){checkPath(path);const {error}=await client.storage.from('takes').upload(path,blob,{contentType:blob.type,upsert:false});if(error)throw error;},
-    downloadUrl(path){checkPath(path);return client.storage.from('takes').getPublicUrl(path).data.publicUrl;},
+    async upload(path,blob){checkPath(path);const {error}=await client.storage.from('takes').upload(userId+'/'+path,blob,{contentType:blob.type,upsert:false});if(error)throw error;},
+    async sign(path){checkPath(path);const {data,error}=await client.storage.from('takes').createSignedUrl(userId+'/'+path,120);if(error)throw error;return data.signedUrl;},
+    downloadUrl(path,signedUrl){
+      checkPath(path);const u=new URL(signedUrl),base=new URL(DUBLAJ.supabaseUrl);
+      if(u.origin!==base.origin || !u.pathname.startsWith('/storage/v1/object/sign/takes/') || !u.searchParams.get('token'))throw new Error('Invalid playback link');
+      return u.href;
+    },
+    async remove(path){checkPath(path);const {error}=await client.storage.from('takes').remove([userId+'/'+path]);if(error)throw error;},
     async clear(){
       // List/remove in batches; removing batch zero avoids pagination skipping after deletion.
-      while(true){const {data,error}=await client.storage.from('takes').list(room,{limit:100});if(error)throw error;if(!data.length)return;
-        const paths=data.filter(x=>x.id).map(x=>room+'/'+x.name);if(!paths.length)return;
+      const prefix=userId+'/'+room;
+      while(true){const {data,error}=await client.storage.from('takes').list(prefix,{limit:100});if(error)throw error;if(!data.length)return;
+        const paths=data.filter(x=>x.id).map(x=>prefix+'/'+x.name);if(!paths.length)return;
         const r=await client.storage.from('takes').remove(paths);if(r.error)throw r.error;}
     }
   };
@@ -1845,7 +1856,7 @@ async function joinSeat(e){
 async function receiveTurn(p){
   if(RS.role!=='seat'||!RS.accepted||p.sender!==RS.host)return;
   if(RS.turn?.takeId===p.takeId){
-    if(RS.upload)fire('take_ready',{...RS.upload,to:RS.host});
+    if(RS.upload)remote.sign(RS.upload.path).then(signedUrl=>fire('take_ready',{...RS.upload,signedUrl,to:RS.host})).catch(()=>{});
     return; // reconnect never destroys a recording or preview
   }
   recCancelled=true;stopAll();
@@ -1883,13 +1894,14 @@ async function sendSeatTake(){
   try{
     stopAll();seatStatus('uploading');$('#seatTakeStatus').textContent='يرفع التسجيل… خل الصفحة مفتوحة';
     if(!RS.upload){
-      // Storage keys stay ASCII even when the clip id is Arabic; the timestamp is still bound to the take.
-      const path=RS.room+'/'+encodeURIComponent(turn.takeId)+'.'+extension(take.mime);
+      // Supabase decodes percent escapes before validating keys; use a plain ASCII UUID.
+      const path=RS.room+'/'+crypto.randomUUID()+'.'+extension(take.mime);
       await remote.upload(path,take.blob);
       if(RS.turn!==turn)return;
       RS.upload={takeId:turn.takeId,path,offset:take.offset,mime:take.mime};
     }
-    await remote.send('take_ready',{...RS.upload,to:RS.host});
+    const signedUrl=await remote.sign(RS.upload.path);
+    await remote.send('take_ready',{...RS.upload,signedUrl,to:RS.host});
     seatWaiting('وصل التسجيل! بانتظار الشباب يشغّلونه');
   }catch(e){
     if(RS.turn!==turn)return;
@@ -1940,7 +1952,7 @@ function initRemote(){
   $('#clearRemoteTakes').onclick=async()=>{
     if(!confirm('تمسح التسجيلات المرفوعة لهالغرفة؟ احفظوا اللي تبونه أول.'))return;
     $('#clearRemoteTakes').disabled=true;
-    try{await remote.clear();toast('انمسحت تسجيلات الليلة');}catch{toast('ما انمسحت. تأكد من الاتصال وصلاحية الحذف');}finally{$('#clearRemoteTakes').disabled=false;}
+    try{await remote.clear();if(remote.online(RS.peer)){await remote.send('clear_takes',{to:RS.peer});toast('طلبنا مسح تسجيلات اللاعب');}else toast('التسجيلات المستلمة تُمسح تلقائيًا. خل اللاعب يتصل لمسح أي رفع معلّق');}catch{toast('ما انمسحت. تأكد من الاتصال وصلاحية الحذف');}finally{$('#clearRemoteTakes').disabled=false;}
   };
   remote.on('presence',setRemoteOnline);remote.on('connection',setRemoteOnline);
   remote.on('reconnected',()=>{if(RS.role==='seat')fire('hello',{name:RS.name});});
@@ -1980,15 +1992,19 @@ function initRemote(){
     if(!Number.isFinite(p.offset)||Math.abs(p.offset)>10||typeof p.mime!=='string'||!/^audio\/(webm|mp4|ogg)/.test(p.mime))return;
     pending.loading=true;
     try{
-      const r=await fetch(remote.downloadUrl(p.path),{signal:AbortSignal.timeout(30000)});if(!r.ok)throw new Error('Download failed');
+      const r=await fetch(remote.downloadUrl(p.path,p.signedUrl),{signal:AbortSignal.timeout(30000)});if(!r.ok)throw new Error('Download failed');
       const bytes=await r.blob();if(!bytes.size||bytes.size>50*1024*1024)throw new Error('Bad recording');
       if(RS.pending!==pending)return;
       const blob=new Blob([bytes],{type:p.mime});await getBuffer(p.takeId,blob);
       if(RS.pending!==pending)return;
+      fire('take_received',{takeId:p.takeId,path:p.path,to:RS.peer});
       clearPending();lamp('');$('#slate').classList.remove('on');
       S.last={id:p.takeId,clip:pending.clip,dubbers:[pending.name],blob,offset:p.offset,adjust:0,score:null};toast('وصل التسجيل!');showResult();
     }catch{if(RS.pending===pending){pending.loading=false;failRemoteTurn('ما قدرنا نحمّل التسجيل. جرّبوا مرة ثانية');}}
   });
+  remote.on('take_received',async p=>{if(RS.role==='seat'&&p.sender===RS.host&&p.path===RS.upload?.path){await remote.remove(p.path);RS.upload=null;}});
+  remote.on('clear_takes',async p=>{if(RS.role==='seat'&&p.sender===RS.host){await remote.clear();fire('takes_cleared',{to:RS.host});}});
+  remote.on('takes_cleared',p=>{if(RS.role==='host'&&p.sender===RS.peer)toast('انمسحت تسجيلات الليلة');});
   remote.on('vote',p=>{
     if(RS.role!=='host'||p.sender!==RS.peer||!RS.vote||RS.vote.override||p.takeId!==RS.vote.takeId||S.last?.id!==p.takeId||!Number.isInteger(p.score)||p.score<1||p.score>10)return;
     votes[RS.name]=p.score;const row=[...$('#vote').querySelectorAll('.pads')].find(x=>x.dataset.n===RS.name);

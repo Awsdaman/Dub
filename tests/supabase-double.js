@@ -2,6 +2,7 @@
 (() => {
   const sid = crypto.randomUUID();
   window.supabase = {createClient: () => ({
+    auth:{async getSession(){return {data:{session:{user:{id:sid}}}};},async signInAnonymously(){return {data:{user:{id:sid}}};}},
     channel(name) {
       let handlers=[],timer,last=0,sub,closed=false;
       const ch={
@@ -23,7 +24,7 @@
     async removeChannel(ch){await ch.close();},
     storage:{from:()=>({
       async upload(path,blob,options){const r=await fetch('/__test/storage/'+path,{method:'POST',body:blob,headers:{'Content-Type':options.contentType}});return {error:r.ok?null:new Error('upload')};},
-      getPublicUrl:path=>({data:{publicUrl:location.origin+'/__test/storage/'+path}}),
+      async createSignedUrl(path){return {data:{signedUrl:'https://test.supabase.co/storage/v1/object/sign/takes/'+path+'?token=test'}};},
       async list(room){return await(await fetch('/__test/list?room='+room)).json();},
       async remove(paths){return await(await fetch('/__test/remove',{method:'POST',body:JSON.stringify(paths)})).json();}
     })}

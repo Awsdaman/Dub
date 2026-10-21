@@ -32,6 +32,10 @@ const report=(name,extra='')=>{results.push({name,result:'PASS',detail:extra});c
  async function page(remote=false){
    const ctx=await browser.newContext({viewport:{width:1440,height:1000},permissions:['microphone']});
    const p=await ctx.newPage();p.on('pageerror',e=>errors.push(e.message));
+   await p.route('https://test.supabase.co/storage/v1/object/sign/takes/**',r=>{
+     const key=new URL(r.request().url()).pathname.split('/takes/')[1],f=storage.get(key);
+     return r.fulfill(f?{body:f.body,contentType:f.type}:{status:404,body:''});
+   });
    if(remote){await p.route('**/config.js',r=>r.fulfill({contentType:'application/javascript',body:'window.DUBLAJ={site:false,supabaseUrl:"https://test.supabase.co",supabaseAnonKey:"test"};'}));await p.route('https://cdn.jsdelivr.net/**',r=>r.fulfill({path:path.join(__dirname,'supabase-double.js'),contentType:'application/javascript'}));}
    return p;
  }
