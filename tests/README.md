@@ -22,3 +22,9 @@ Installed Chrome and Edge are required. Browser tests use isolated profiles and 
 The editor test creates a two-second fixture, calls the actual save endpoint, checks trimming and timing, deletes its own fixture, and restores the manifest. Do not run it while a person is editing or preparing clips. It leaves the user's original clips untouched.
 
 Screenshots and machine-readable results go to ignored `tests/artifacts/`. See `TEST-RESULTS-remote-seat.md` for the reported scope and unverified checks.
+# Live deployment checks
+
+`node tests/live-supabase.cjs` tests real Supabase against the local export by default. Set `GAME_URL=https://dub-ashen-ten.vercel.app/` to test the published game. It uses synthetic microphone audio, verifies public viewing and owner-only writes/deletes, records a full clip, transfers it, plays it on the host and votes remotely.
+
+`node tests/live-recovery.cjs` checks the published game's reconnection and actual clip-duration-plus-90-second timeout. It takes around two minutes. Both scripts create temporary anonymous player identities; successful uploads are deleted by their owner.
+
