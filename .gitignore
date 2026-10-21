@@ -1,0 +1,16 @@
+/.venv/
+/originals/
+/processed/
+/clips/
+__pycache__/
+.impeccable/review/
+config.local.json
+.test-tools/
+tests/artifacts/
+*.log
+.vercel/
+.env
+.env.*
+.impeccable/build/
+.impeccable/questions/
+# site/ is intentionally committed for static hosting.
