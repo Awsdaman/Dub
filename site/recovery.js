@@ -5,7 +5,7 @@ const recoveryDB=new Promise((resolve,reject)=>{
  request.onupgradeneeded=()=>request.result.createObjectStore('night');
  request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);
 });
-function recoverySnapshot(){return structuredClone({version:1,players:S.players,scored:S.scored,played:[...S.played],round:S.round,dubs:S.dubs,last:S.last,session:E.session,seat:RS.role==='seat'&&RS.take?{room:RS.room,name:RS.name,turn:RS.turn,take:RS.take}:null});}
+function recoverySnapshot(){return structuredClone({version:1,players:S.players,scored:S.scored,played:[...S.played],round:S.round,dubs:S.dubs,bloopers:S.bloopers,last:S.last,session:E.session,seat:RS.role==='seat'&&RS.take?{room:RS.room,name:RS.name,turn:RS.turn,take:RS.take}:null});}
 function recoveryTransaction(mode,value){return recoveryDB.then(db=>new Promise((resolve,reject)=>{
  const tx=db.transaction('night',mode),store=tx.objectStore('night');const request=mode==='readonly'?store.get('current'):store.put(value,'current');
  tx.oncomplete=()=>resolve(request.result);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Storage aborted'));
@@ -32,7 +32,7 @@ $('#restoreRecordings').onclick=async()=>{
  const data=recoveryPending;if(!data)return;
  if(data.seat){$('#joinSeatBtn').click();$('#seatRoom').value=data.seat.room;$('#seatName').value=data.seat.name;toast('انضم لنفس الغرفة عشان ترجع ترسل تسجيلك');return;}
  initAudio();await ctx.resume();
- S.players=data.players;S.scored=data.scored;S.played=new Set(data.played);S.round=data.round;S.dubs=data.dubs||[];S.last=data.last;E.session=data.session;
+ S.players=data.players;S.scored=data.scored;S.played=new Set(data.played);S.round=data.round;S.dubs=data.dubs||[];S.bloopers=data.bloopers||[];S.last=data.last;E.session=data.session;
  recoveryPending=null;$('#recoveryNotice').hidden=true;renderPlayers();renderMode();beforeRecoverySave();
  if(E.session){
    S.current=E.session.clip;

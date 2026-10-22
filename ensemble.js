@@ -205,7 +205,7 @@ $('#seatResume').onclick=showSeatBooth;
 const oldShowResult=showResult;showResult=function(){band.assigned=null;oldShowResult();};
 remote.replace('take_ready',async p=>{
   const pending=RS.pending;if(RS.role!=='host'||!pending||p.sender!==pending.peer||p.takeId!==pending.takeId||pending.loading)return;
-  if(!Number.isFinite(p.offset)||Math.abs(p.offset)>10||!/^audio\/(webm|mp4|ogg)/.test(p.mime||''))return;
+  if(!Number.isFinite(p.offset)||Math.abs(p.offset)>10||!/^audio\/(webm|mp4|ogg|wav)/.test(p.mime||''))return;
   pending.loading=true;
   try{
     const r=await fetch(remote.downloadUrl(p.path,p.signedUrl),{signal:AbortSignal.timeout(30000)});if(!r.ok)throw Error('download');const bytes=await r.blob();if(!bytes.size||bytes.size>50*1024*1024)throw Error('size');

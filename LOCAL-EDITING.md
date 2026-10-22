@@ -41,3 +41,7 @@ git push origin main
 البسوا سماعات: أثناء سطور اللاعب تسمع الموسيقى والمؤثرات؛ خارجها تسمع الصوت الأصلي. عند تداخل الكلام، يُكتم كل الكلام الأصلي خلال السطور المسندة للاعب، لأن الملفات الحالية ليست مفصولة لكل شخصية.
 الكليبات القديمة بدون توقيت يدوي تبقى قابلة للعب من جهاز واحد؛ وضع عدة أجهزة يطلب تجهيز الشخصيات والتوقيت أولًا.
 الأدوار المستلمة تبقى في ذاكرة جهاز المضيف حتى تنتهي الجولة. تحديث صفحة المضيف يفقدها.
+
+## Typed times and voice effects
+
+Each line's start and end, and the scene start and end, can be typed in seconds with two decimals (for example `12.35`). Press Enter or leave the box to apply it. Each line also has a voice-effect menu (echo, cave/hall, giant, cartoon high, robot, radio/phone). The effect is applied to the dubber's voice during that line in playback, the downloaded video and the reels.

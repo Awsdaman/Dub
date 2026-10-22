@@ -221,6 +221,8 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
 
 .bandwrap{position:relative;margin:.9rem calc(-1 * clamp(16px,2.2vw,40px)) 0}
 #band{display:block;width:100%;height:clamp(7rem,14.5vh,11rem)}
+#band.scrub{cursor:grab;touch-action:none}
+#band.scrub:active{cursor:grabbing}
 .bandcap{position:absolute;bottom:.4rem;inset-inline-start:clamp(16px,2.2vw,40px);font-size:.75rem;color:#6e6656;font-weight:500;pointer-events:none}
 
 .console{display:flex;flex-direction:column;gap:.9rem;align-items:center;width:100%}
@@ -316,6 +318,10 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
 .ln .tm{grid-column:2 / 4;display:flex;align-items:center;gap:.35rem;font-size:.85rem;color:#5d5546;flex-wrap:wrap}
 .ln .tm b{font-variant-numeric:tabular-nums;color:#1f1b16;min-width:3.2rem;text-align:center;background:#e2dac6;border-radius:.3rem;padding:0 .3rem}
 .ln .tm b.none{color:#8c8270;font-weight:500}
+.ln .tm input.num{width:4.6rem;font:700 .9rem var(--ui);font-variant-numeric:tabular-nums;text-align:center;color:#1f1b16;background:#e2dac6;border:0;border-radius:.3rem;padding:.1rem .2rem}
+.ln .tm input.num:focus{outline:2px solid var(--onair)}
+.trimnum{display:flex;align-items:center;gap:.4rem;color:var(--ink-dim);font-size:.9rem}
+.trimnum input{width:5.2rem;font:700 1rem var(--ui);font-variant-numeric:tabular-nums;text-align:center;color:var(--tape-ink);background:var(--tape);border:0;border-radius:.3rem;padding:.25rem .3rem}
 .ln .tm button{font-weight:700;font-size:.8rem;padding:.15rem .5rem;border-radius:.35rem;background:#d9d0ba;color:#2b261f}
 .ln .tm button:hover{background:#cdc3aa}
 .hold{margin-top:1.2rem;text-align:center}
@@ -522,7 +528,19 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
 
         <!-- record -->
         <div class="console" id="c-record">
-          <div class="keys"><button class="key" id="cancelRecBtn"><svg class="i"><use href="#i-stop"/></svg>وقّف</button></div>
+          <div class="keys" id="recLive"><button class="key big" id="pauseRecBtn"><svg class="i"><use href="#i-stop"/></svg>وقّف</button></div>
+          <p class="hint" id="recLiveHint">غلطت؟ وقّف، وارجع بالشريط للمكان اللي تبي تعيده</p>
+          <div class="console" id="recPaused" hidden>
+            <p class="hint">اسحب شريط النص تحت للمكان اللي تبي تعيده. بتسمع ٣ ثواني قبله من تسجيلك.</p>
+            <div class="keys tight">
+              <button class="key" id="tapeListen"><svg class="i"><use href="#i-play"/></svg><span>اسمع من هنا</span></button>
+              <button class="key big rec" id="tapePunch"><svg class="i"><use href="#i-rec"/></svg>سجّل من هنا</button>
+            </div>
+            <div class="keys tight">
+              <button class="key go" id="tapeDone"><svg class="i"><use href="#i-check"/></svg>خلّصت</button>
+              <button class="key flat" id="cancelRecBtn"><svg class="i"><use href="#i-x"/></svg>ألغِ التسجيل</button>
+            </div>
+          </div>
         </div>
 
         <!-- result -->
@@ -530,9 +548,11 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
           <div class="keys tight">
             <button class="key lit" id="replayDubBtn"><svg class="i"><use href="#i-play"/></svg>عيدها</button>
             <button class="key" id="origBtn"><svg class="i"><use href="#i-film"/></svg>الأصلي</button>
+            <button class="key" id="punchBtn"><svg class="i"><use href="#i-rec"/></svg>سجّل من هنا</button>
             <button class="key" id="redoBtn"><svg class="i"><use href="#i-rec"/></svg>من جديد</button>
             <button class="key" id="saveBtn"><svg class="i"><use href="#i-save"/></svg>نزّل الفيديو</button>
           </div>
+          <p class="hint" id="scrubHint">اسحب شريط النص تحت عشان تسمع أي جزء</p>
           <div id="downloadPanel" hidden style="text-align:center;margin:1rem 0">
             <p id="downloadStatus" role="status" aria-live="polite"></p>
             <a class="key" id="downloadLink" hidden>نزّل الملف الجاهز</a>
@@ -566,7 +586,7 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
           <p id="seatTakeStatus" role="status" aria-live="polite"></p><progress id="seatUpload" aria-label="يرفع التسجيل" hidden></progress>
           <div class="keys"><button class="key" id="seatWatch">شوف الأصلي</button><button class="key big rec" id="seatRecord">سجّل</button></div>
           <label class="hint"><input type="checkbox" id="seatHearBg"> اسمع الموسيقى بالسماعة وقت التسجيل</label>
-          <div id="seatPreview" hidden><button class="key" id="seatReplay">اسمع دبلجتك</button><button class="key big go" id="seatSend">أرسلها</button></div>
+          <div id="seatPreview" hidden><button class="key" id="seatReplay">اسمع دبلجتك</button><button class="key" id="seatPunch">سجّل من هنا</button><button class="key big go" id="seatSend">أرسلها</button><p class="hint">اسحب شريط النص تحت عشان تسمع أي جزء</p></div>
           <button class="key flat" id="seatCancel">ألغِ الدور</button>
         </div>
         <!-- reel -->
@@ -633,7 +653,9 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
         </div>
         <div class="trimrow">
           <button class="key flat" id="setIn"><svg class="i"><use href="#i-in"/></svg>يبدأ من هنا</button>
+          <label class="trimnum">يبدأ <input type="number" id="trimInNum" step="0.01" min="0" dir="ltr" aria-label="بداية المشهد بالثواني"> ث</label>
           <span class="readout" id="trimRead"></span>
+          <label class="trimnum">يخلص <input type="number" id="trimOutNum" step="0.01" min="0" dir="ltr" aria-label="نهاية المشهد بالثواني"> ث</label>
           <button class="key flat" id="setOut"><svg class="i"><use href="#i-out"/></svg>يخلص هنا</button>
         </div>
       </div>
@@ -680,7 +702,7 @@ const DUBLAJ = window.DUBLAJ || {};
 const WAX = 8;
 const S = {
   clips: [], players: [], scored: true, played: new Set(),
-  dubs: [], current: null, dubbers: [], round: 1, last: null,
+  dubs: [], current: null, dubbers: [], round: 1, last: null, bloopers: [],
 };
 const v = $('#v');
 let ctx, mixDest, voiceGain, bgGain, micStream;
@@ -724,7 +746,9 @@ function show(id) {
   window.scrollTo({top: 0});
   if (typeof remotePhase === 'function') remotePhase(id);
 }
+let shownControls = null;
 function controls(id) {
+  shownControls = id;
   ['c-watch', 'c-record', 'c-result', 'c-reel', 'c-remote', 'c-seat'].forEach(c => $('#' + c).style.display = c === id ? 'flex' : 'none');
   $('#vuSide').style.display = id === 'c-record' || id === 'c-watch' ? 'block' : 'none';
 }
@@ -876,18 +900,19 @@ function loadVideo(clip) {
     v.load();
   });
 }
-async function seekZero() {
-  if (v.currentTime === 0) return;
-  await new Promise(r => { v.onseeked = () => { v.onseeked = null; r(); }; v.currentTime = 0; });
+async function seekTo(t) {
+  if (Math.abs(v.currentTime - t) < .001) return;
+  await new Promise(r => { v.onseeked = () => { v.onseeked = null; r(); }; v.currentTime = t; });
 }
+const seekZero = () => seekTo(0);
 // wait for the first painted frame, but never longer than 150ms
 const nextFrame = () => new Promise(r => {
   setTimeout(r, 150);
   if ('requestVideoFrameCallback' in v) v.requestVideoFrameCallback(() => r()); else r();
 });
-async function playVideoWith(tracks) {
+async function playVideoWith(tracks, from = 0) {
   const token = playToken;
-  await seekZero();
+  await seekTo(from);
   if(token!==playToken)return;
   await v.play();
   await nextFrame();
@@ -906,6 +931,12 @@ const ended = () => new Promise(resolve => {
   // position too, without treating network stalls earlier in the clip as done.
   timer=setInterval(()=>{if(v.ended||(Number.isFinite(v.duration)&&v.duration>0&&v.currentTime>=v.duration-.05))finish();},250);
 });
+// resolves when playback reaches t (or the clip ends / is stopped)
+const until = t => new Promise(resolve => {
+  const finish = () => { clearInterval(timer); resolve(); };
+  const timer = setInterval(() => { if (v.currentTime >= t) finish(); }, 40);
+  ended().then(finish);
+});
 
 /* burnt-in timecode */
 (function tcLoop() {
@@ -915,7 +946,7 @@ const ended = () => new Promise(resolve => {
 })();
 
 /* ================= rhythmo band ================= */
-const band = {clock: () => 0, blocks: [], texts: [], dur: 0, countdown: false, live: false};
+const band = {clock: () => 0, blocks: [], texts: [], dur: 0, countdown: false, live: false, tape: null, punchAt: null};
 const bandCanvas = $('#band');
 
 function parseLines(raw, dur, speech) {
@@ -1008,6 +1039,18 @@ function drawBand(cv, B) {
     const match=sortedLines.find(l=>l.start===a&&l.end===b), row=lineLanes.get(match)||0;
     roundRect(g, x2, top+rowHeight*(row+.5)-bh/2, Math.max(4, x1-x2), bh, bh/2); g.fill();
   }
+  // what this take has on tape so far: earlier passes in green, the pass being recorded in red
+  if (B.tape) for (const [a, b, live] of B.tape()) {
+    const x1 = Math.min(W, X(a)), x2 = Math.max(0, X(Math.min(b, B.dur || b)));
+    if (x1 <= x2) continue;
+    g.fillStyle = live ? '#ff2a1f' : '#4f9e62';
+    roundRect(g, x2, bot - 9, x1 - x2, 6, 3); g.fill();
+  }
+  // where the next pass starts recording
+  if (B.punchAt != null) {
+    const x = X(B.punchAt);
+    g.fillStyle = '#ff2a1f'; g.fillRect(x - 2, top, 4, bot - top);
+  }
   // the lines, written right to left so the first word reaches the bar first
   g.direction = 'rtl'; g.textAlign = 'right'; g.textBaseline = 'middle';
   const texts = sortedLines;
@@ -1048,8 +1091,44 @@ function drawBand(cv, B) {
   g.beginPath(); g.moveTo(barX - 11, 0); g.lineTo(barX + 11, 0); g.lineTo(barX, 14); g.fill();
   g.beginPath(); g.moveTo(barX - 11, H); g.lineTo(barX + 11, H); g.lineTo(barX, H - 14); g.fill();
 }
+/* drag the band to move through the clip whenever nothing is being recorded */
+function scrubMode() {
+  if (captureBusy) return tape.menu ? 'tape' : null;
+  if (downloadBusy || !$('#s-play').classList.contains('on')) return null;
+  if (shownControls === 'c-result' && S.last) return 'result';
+  if (shownControls === 'c-seat') return RS.take && !$('#seatPreview').hidden ? 'seat' : 'watch';
+  if (shownControls === 'c-watch') return 'watch';
+  return null;
+}
+let bandDrag = null;
+bandCanvas.addEventListener('pointerdown', e => {
+  const mode = scrubMode();
+  if (!mode || !v.duration) return;
+  bandCanvas.setPointerCapture(e.pointerId);
+  bandDrag = {mode, x: e.clientX, t: v.currentTime, moved: false, wasPlaying: !v.paused};
+  if (mode === 'tape') { if (tape.listening) tape.listen(); }
+  else if (mode === 'watch') v.pause();
+  else stopAll();
+});
+bandCanvas.addEventListener('pointermove', e => {
+  if (!bandDrag) return;
+  const dx = e.clientX - bandDrag.x;
+  if (Math.abs(dx) > 3) bandDrag.moved = true;
+  v.currentTime = Math.max(0, Math.min(v.duration - .05, bandDrag.t + dx / (bandCanvas.clientWidth / 7.5)));
+});
+function endBandDrag() {
+  const d = bandDrag; bandDrag = null;
+  if (!d || d.mode === 'tape') return;
+  // a tap pauses or resumes; a drag keeps going from the new spot
+  const play = d.moved ? (d.mode !== 'watch' || d.wasPlaying) : !d.wasPlaying;
+  if (!play) return;
+  if (d.mode === 'watch') v.play().catch(() => {});
+  else playDub(d.mode === 'seat' ? RS.take : S.last, {from: v.currentTime}).catch(() => {});
+}
+bandCanvas.addEventListener('pointerup', endBandDrag);
+bandCanvas.addEventListener('pointercancel', endBandDrag);
 (function bandLoop() {
-  if ($('#s-play').classList.contains('on')) drawBand(bandCanvas, band);
+  if ($('#s-play').classList.contains('on')) { bandCanvas.classList.toggle('scrub', !!scrubMode()); drawBand(bandCanvas, band); }
   if ($('#s-edit').classList.contains('on')) drawBand($('#eband'), ed.band);
   requestAnimationFrame(bandLoop);
 })();
@@ -1240,51 +1319,174 @@ $('#origBtn').onclick = async () => {
 
 /* ================= record ================= */
 let recorder = null, recCancelled = false, captureBusy = false;
-async function captureTake(clip, {hearBg = false, status = () => {}} = {}) {
+// The take is a stack of passes. A later pass wins inside its own [from, to] range,
+// so re-recording a part keeps everything before and after it.
+const tape = {segs: [], live: null, pause: null, menu: null, listen: null, listening: false, keep: false};
+const tapeRanges = () => [...tape.segs.map(s => [s.from, s.to, false]),
+  ...(tape.live && v.currentTime > tape.live.from ? [[tape.live.from, v.currentTime, true]] : [])];
+async function renderTape(segs, duration, mask = null) {
+  const rate = ctx.sampleRate, out = ctx.createBuffer(1, Math.max(1, Math.ceil(duration * rate)), rate), dst = out.getChannelData(0);
+  const fade = Math.round(rate * .012);
+  for (const s of segs) {
+    const audio = await getBuffer(s.id, s.blob), chans = Array.from({length: audio.numberOfChannels}, (_, c) => audio.getChannelData(c));
+    const at = i => {
+      const j = Math.floor((i / rate + s.offset) * audio.sampleRate);
+      if (j < 0 || j >= audio.length) return 0;
+      let x = 0; for (const c of chans) x += c[j]; return x / chans.length;
+    };
+    const a = Math.max(0, Math.round(s.from * rate)), b = Math.min(dst.length, Math.round(s.to * rate));
+    // short crossfades at both edges so a punch-in never clicks
+    for (let i = a; i < b; i++) {
+      if (i % 131072 === 0) await new Promise(r => setTimeout(r, 0));
+      const k = Math.min(1, (i - a) / fade);
+      dst[i] = dst[i] * (1 - k) + at(i) * k;
+    }
+    for (let i = b; i < Math.min(dst.length, b + fade); i++) { const k = (i - b) / fade; dst[i] = at(i) * (1 - k) + dst[i] * k; }
+  }
+  if (mask) {
+    const keep = new Uint8Array(dst.length);
+    for (const [a, b] of mask) keep.fill(1, Math.max(0, Math.floor(a * rate)), Math.min(dst.length, Math.ceil(b * rate)));
+    for (let i = 0; i < dst.length; i++) if (!keep[i]) dst[i] = 0;
+  }
+  return out;
+}
+function recPanel(paused) {
+  $('#recLive').hidden = paused; $('#recLiveHint').hidden = paused; $('#recPaused').hidden = !paused;
+}
+async function captureTake(clip, {hearBg = false, status = () => {}, base = null, from = 0, characters = activeCharacters(), mask = null} = {}) {
   if (captureBusy) throw new Error('التسجيل شغال');
   captureBusy = true; recCancelled = false;
-  stopAll(); const token = playToken;
+  stopAll(); let token = playToken;
+  // stop our own playback without ending the session
+  const quiet = () => { stopAll(); token = playToken; };
   const cancelled = () => { if (recCancelled || token !== playToken) throw new DOMException('Cancelled', 'AbortError'); };
-  let localRecorder;
-  try {
-    initAudio(); await ctx.resume();
-    const mic = await getMic(); cancelled(); meterLoop(mic);
-    if (!await enterBooth(clip)) throw new Error('ما قدرنا نشغّل الفيديو');
-    controls('c-record'); setWho(S.dubbers); v.muted = true;
-    await seekZero(); cancelled();
-    const bg = hearBg ? await recordingGuide(clip, activeCharacters()) : null;
-    cancelled(); status('countdown');
-    const c0 = performance.now(); band.countdown = true; band.live = true;
-    band.clock = () => (performance.now() - c0) / 1000 - 3; lamp('on blink');
-    for (const n of [3,2,1]) {
-      cancelled(); $('#countdown').innerHTML = `<b>${['','١','٢','٣'][n]}</b>`;
-      beep(n === 1 ? 1200 : 700, .15, .3); await sleep(Math.max(0,c0+(4-n)*1000-performance.now()));
-    }
-    cancelled(); $('#countdown').innerHTML = '';
+  tape.segs = base ? [...base] : []; tape.live = null;
+  let guideP = null, mixP = null, localRecorder;
+  const guide = () => guideP ??= recordingGuide(clip, characters);
+  const mix = () => mixP ??= renderTape(tape.segs, v.duration);
+  const mic = async () => { const m = await getMic(); cancelled(); meterLoop(m); return m; };
+  const mime = ['audio/webm;codecs=opus','audio/mp4','audio/ogg;codecs=opus'].find(m => MediaRecorder.isTypeSupported(m));
+
+  // one pass: from `at` until the clip ends or the player presses stop
+  async function recordPass(at, bg) {
+    const lead = at ? Math.min(3, at) : 0;
+    const prev = lead && tape.segs.length ? await mix() : null; cancelled();
+    recPanel(false); $('#pauseRecBtn').disabled = true;
+    status('countdown');
+    await seekTo(at - lead); cancelled();
+    band.live = true;
+    if (!at) {
+      const c0 = performance.now(); band.countdown = true;
+      band.clock = () => (performance.now() - c0) / 1000 - 3; lamp('on blink');
+      for (const n of [3,2,1]) {
+        cancelled(); $('#countdown').innerHTML = `<b>${['','١','٢','٣'][n]}</b>`;
+        beep(n === 1 ? 1200 : 700, .15, .3); await sleep(Math.max(0,c0+(4-n)*1000-performance.now()));
+      }
+      cancelled(); $('#countdown').innerHTML = ''; band.countdown = false;
+    } else { band.clock = () => v.currentTime; band.punchAt = at; lamp('on blink'); }
     const chunks = [];
-    const mime = ['audio/webm;codecs=opus','audio/mp4','audio/ogg;codecs=opus'].find(m => MediaRecorder.isTypeSupported(m));
-    localRecorder = recorder = new MediaRecorder(mic, mime ? {mimeType:mime,audioBitsPerSecond:160000} : {});
+    localRecorder = recorder = new MediaRecorder(await mic(), mime ? {mimeType:mime,audioBitsPerSecond:160000} : {});
     localRecorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
     const stopped = new Promise((resolve,reject) => { localRecorder.onstop=resolve; localRecorder.onerror=e=>reject(e.error || new Error('Recording failed')); });
     await new Promise(resolve => { localRecorder.onstart=resolve; localRecorder.start(); });
-    const t0 = performance.now(); status('recording'); lamp('on'); $('#monitor').classList.add('live');
-    const done = ended();
-    await seekZero(); cancelled(); await v.play(); await nextFrame(); cancelled();
-    const offset = (performance.now()-t0)/1000-v.currentTime;
-    band.clock = () => v.currentTime;
+    const t0 = performance.now();
+    const seg = {id: 'pass-' + crypto.randomUUID(), from: at, to: at, offset: 0, blob: null};
+    tape.live = seg;
+    const done = ended(), paused = new Promise(r => tape.pause = r);
+    await seekTo(at - lead); cancelled(); await v.play(); await nextFrame(); cancelled();
+    seg.offset = (performance.now()-t0)/1000-v.currentTime;
+    band.clock = () => v.currentTime; $('#pauseRecBtn').disabled = false;
     if (bg) startBuffer(bg,bgGain,v.currentTime);
-    await done; cancelled(); status('processing'); lamp(''); await sleep(350); cancelled();
+    if (prev) startBuffer(prev, voiceGain, v.currentTime).stop(ctx.currentTime + Math.max(0, at - v.currentTime));
+    const goLive = () => { band.punchAt = null; status('recording'); lamp('on'); $('#monitor').classList.add('live'); };
+    if (!lead) goLive();
+    else (function wait() { if (tape.live !== seg) return; if (v.currentTime >= at) goLive(); else requestAnimationFrame(wait); })();
+    const why = await Promise.race([done.then(() => 'end'), paused]); cancelled();
+    tape.pause = null;
+    if (why === 'end') { status('processing'); lamp(''); await sleep(350); cancelled(); seg.to = v.duration; }
+    else seg.to = Math.max(at, why);
+    tape.live = null; band.punchAt = null; band.live = false;
+    lamp(''); $('#monitor').classList.remove('live');
+    quiet();
     localRecorder.stop(); await stopped; cancelled();
-    const blob = new Blob(chunks,{type:localRecorder.mimeType || mime || 'audio/webm'});
-    if (!blob.size) throw new Error('التسجيل طلع فاضي');
-    return {blob,offset,mime:blob.type};
+    seg.blob = new Blob(chunks,{type:localRecorder.mimeType || mime || 'audio/webm'});
+    if (!seg.blob.size) throw new Error('التسجيل طلع فاضي');
+    if (seg.to - seg.from > .05) { tape.segs.push(seg); mixP = null; }
+    if (why !== 'end' && seg.to - seg.from > 1 && typeof keepBlooper === 'function')
+      keepBlooper({clip, dubbers: [...S.dubbers], characters, blob: seg.blob, offset: seg.offset, from: Math.max(seg.from, seg.to - 5), to: seg.to});
+    return why === 'end';
+  }
+
+  // stopped: drag the band, listen, then record again from there or finish
+  function pausedMenu() {
+    status('paused'); recPanel(true); band.clock = () => v.currentTime;
+    return new Promise((resolve, reject) => {
+      let beat = 0;
+      const poll = setInterval(() => {
+        if (recCancelled || token !== playToken) { close(); reject(new DOMException('Cancelled', 'AbortError')); }
+        else if (++beat % 80 === 0) status('paused');
+      }, 250);
+      const close = () => { clearInterval(poll); tape.menu = null; tape.listen = null; tape.listening = false; listenLabel(); };
+      tape.menu = {
+        punch: () => { const t = v.currentTime; if (tape.listening) quiet(); close(); resolve(t); },
+        finish: () => { if (tape.listening) quiet(); close(); resolve(null); },
+      };
+      let listenId = 0;
+      tape.listen = async () => {
+        const my = ++listenId;
+        if (tape.listening) { quiet(); tape.listening = false; listenLabel(); return; }
+        const t = v.currentTime;
+        tape.listening = true; listenLabel();
+        try {
+          const [m, g] = await Promise.all([mix(), guide()]);
+          if (my !== listenId || !tape.menu) return;
+          quiet(); await seekTo(t); await v.play(); await nextFrame();
+          if (my !== listenId || !tape.menu) return;
+          startBuffer(m, voiceGain, v.currentTime); startBuffer(g, bgGain, v.currentTime);
+          const listening = playToken; await ended();
+          if (my === listenId && listening === playToken) { tape.listening = false; listenLabel(); }
+        } catch (e) { console.error(e); tape.listening = false; listenLabel(); }
+      };
+    });
+  }
+
+  try {
+    initAudio(); await ctx.resume();
+    await mic();
+    if (!await enterBooth(clip)) throw new Error('ما قدرنا نشغّل الفيديو');
+    controls('c-record'); setWho(S.dubbers); v.muted = true;
+    band.tape = tapeRanges;
+    const bg = hearBg ? await guide() : null;
+    cancelled();
+    let at = from < 1 ? 0 : from;
+    while (!await recordPass(at, bg)) {
+      const next = await pausedMenu();
+      if (next == null) break;
+      at = next < 1 ? 0 : next;
+    }
+    status('processing');
+    const segs = tape.segs;
+    if (!segs.length) throw new Error('التسجيل طلع فاضي');
+    if (segs.length === 1 && !segs[0].from && !mask) return {blob: segs[0].blob, offset: segs[0].offset, mime: segs[0].blob.type};
+    toast('نجهّز تسجيلك…');
+    const out = wavBlob(await renderTape(segs, v.duration, mask)); cancelled();
+    for (const s of segs) if (s.id.startsWith('pass-')) bufCache.delete(s.id);
+    return {blob: out, offset: 0, mime: out.type};
   } finally {
     if (localRecorder && localRecorder.state !== 'inactive') localRecorder.stop();
-    recorder = null; captureBusy = false;
+    recorder = null; captureBusy = false; tape.live = null; tape.pause = null; tape.menu = null; tape.listen = null; tape.listening = false;
+    recPanel(false); band.tape = null; band.punchAt = null;
     lamp(''); band.countdown = false; band.live = false; $('#countdown').innerHTML=''; $('#monitor').classList.remove('live');
     if (token === playToken) stopAll();
   }
 }
+function listenLabel() {
+  $('#tapeListen').innerHTML = tape.listening ? `${icon('pause')}<span>وقّف السماع</span>` : `${icon('play')}<span>اسمع من هنا</span>`;
+}
+$('#pauseRecBtn').onclick = () => tape.pause?.(v.currentTime);
+$('#tapePunch').onclick = () => tape.menu?.punch();
+$('#tapeDone').onclick = () => tape.menu?.finish();
+$('#tapeListen').onclick = () => tape.listen?.();
 async function record() {
   if (remoteDubber()) return requestRemoteTurn();
   if (captureBusy) return;
@@ -1301,15 +1503,39 @@ async function record() {
 $('#recBtn').onclick = record;
 $('#cancelRecBtn').onclick = () => {
   recCancelled=true; stopAll();
+  if (tape.keep) return; // re-recording a finished take: its caller goes back to that take
   if (RS.role === 'seat') cancelSeatTurn(); else watchOriginal();
 };
+// The whole finished take is the bottom pass; the new pass replaces only what is recorded over.
+const basePass = entry => [{id: entry.id, blob: entry.blob, offset: entry.offset, from: 0, to: Infinity}];
+const canPunch = e => !!e && RS.role !== 'seat' && e.dubbers.length === 1 && !player(e.dubbers[0])?.remote;
+async function punchResult() {
+  const entry = S.last;
+  if (!canPunch(entry) || captureBusy || downloadBusy) return;
+  const at = v.currentTime;
+  if (RS.vote) { fire('vote_closed',{takeId:RS.vote.takeId,avg:null}); RS.vote=null; }
+  sendHostPhase('recording');
+  tape.keep = true;
+  try {
+    const take = await captureTake(entry.clip, {hearBg: $('#hearBg').checked, base: basePass(entry), from: at,
+      characters: entry.characters || null, mask: entry.characters ? assignedIntervals(entry.clip, entry.characters, v.duration) : null});
+    bufCache.delete(entry.id);
+    S.last = {...entry, id: entry.clip.id + '-' + Date.now(), ...take, score: null};
+  } catch (e) {
+    if (e.name !== 'AbortError') toast('ما ضبط التسجيل. رجعنا لتسجيلك السابق');
+  } finally { tape.keep = false; }
+  showResult();
+}
+$('#punchBtn').onclick = punchResult;
 
 /* ================= result ================= */
 function mediaDeadline(promise,ms,message){
   let timer;
   return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(message)),ms);})]).finally(()=>clearTimeout(timer));
 }
-async function playDub(entry, {exportFile = false} = {}) {
+// studio.js swaps this for a version that adds the clip's per-line voice effects
+let voiceTrack = async entry => ({buf: await getBuffer(entry.id, entry.blob), gain: voiceGain, offset: entry.offset - entry.adjust / 1000});
+async function playDub(entry, {exportFile = false, from = 0, to = null} = {}) {
   stopAll();
   const token = playToken;
   initAudio();
@@ -1318,8 +1544,7 @@ async function playDub(entry, {exportFile = false} = {}) {
   v.muted = true;
   setWho(entry.dubbers);
   band.clock = () => v.currentTime; band.countdown = false; band.live = false;
-  const voice = await mediaDeadline(getBuffer(entry.id, entry.blob),45000,'تأخر تجهيز تسجيلك. جرّب التنزيل مرة ثانية.');
-  const tracks = [{buf: voice, gain: voiceGain, offset: entry.offset - entry.adjust / 1000}];
+  const tracks = [await mediaDeadline(voiceTrack(entry),45000,'تأخر تجهيز تسجيلك. جرّب التنزيل مرة ثانية.')];
   tracks.push({buf: await mediaDeadline(recordingGuide(entry.clip,entry.characters||null),45000,'تأخر تجهيز صوت الكليب. تأكد من الاتصال وجرّب مرة ثانية.'), gain: bgGain});
   if (token !== playToken) return;
 
@@ -1339,11 +1564,12 @@ async function playDub(entry, {exportFile = false} = {}) {
     started=mediaDeadline(new Promise((resolve,reject) => { rec.onstart = resolve; rec.onerror=e=>{recordingError=e.error||new Error('تعذّر تجهيز الفيديو');reject(recordingError);flushEnded();};rec.start(1000); }),10000,'تعذّر بدء تجهيز الفيديو. جرّب مرة ثانية.');
     started.catch(()=>{});
   }
-  const done = ended();
-  await mediaDeadline(playVideoWith(tracks),15000,'تعذّر بدء تشغيل الفيديو. جرّب مرة ثانية.');
+  const done = to == null ? ended() : until(to);
+  await mediaDeadline(playVideoWith(tracks, exportFile ? 0 : from),15000,'تعذّر بدء تشغيل الفيديو. جرّب مرة ثانية.');
   if(started)await started;
   if(exportFile)await mediaDeadline(done,(Number.isFinite(v.duration)?v.duration:120)*1000+30000,'توقف تجهيز الفيديو قبل النهاية. تأكد من الاتصال وجرّب مرة ثانية.');
   else await done;
+  if (to != null && token === playToken) stopAll();
   if (rec) {
     if(recordingError)throw recordingError;
     if(rec.state!=='inactive')await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('تأخر تجهيز الملف. جرّب مرة ثانية.')),10000);rec.onstop=()=>{clearTimeout(timer);resolve();};rec.stop();});
@@ -1358,6 +1584,7 @@ function showResult() {
   $('#downloadPanel').hidden=true;$('#downloadLink').hidden=true;
   if(readyDownload){URL.revokeObjectURL(readyDownload);readyDownload=null;}
   controls('c-result');
+  $('#punchBtn').hidden = !canPunch(S.last);
   syncLabel();
   $('#voteCard').style.display = S.scored ? '' : 'none';
   renderVote();
@@ -1379,7 +1606,7 @@ let downloadBusy=false,readyDownload=null;
 $('#saveBtn').onclick=async()=>{
   if(downloadBusy||!S.last)return;
   downloadBusy=true;const entry=S.last;
-  const buttons=['saveBtn','replayDubBtn','origBtn','redoBtn','syncEarly','syncLate','nextBtn'].map(id=>$('#'+id));
+  const buttons=['saveBtn','replayDubBtn','origBtn','punchBtn','redoBtn','syncEarly','syncLate','nextBtn'].map(id=>$('#'+id));
   buttons.forEach(b=>b.disabled=true);$('#downloadPanel').hidden=false;$('#downloadLink').hidden=true;
   const status=$('#downloadStatus');status.textContent='نجهّز الفيديو… بيشتغل الكليب كامل قبل التنزيل. خل الصفحة مفتوحة.';
   let moving=false;const progress=()=>{moving=true;};v.addEventListener('playing',progress);
@@ -1510,6 +1737,7 @@ const ev = $('#ev');
 const ed = {clip: null, dur: 0, trim: {in: 0, out: 0}, lines: [], sel: null, holding: false, dirty: false,
   band: {clock: () => ev.currentTime, blocks: [], texts: [], dur: 0, countdown: false, live: false, sel: null}};
 const sec = n => n == null ? '—' : (Math.round(n * 10) / 10).toFixed(1);
+const secIn = n => n == null ? '' : (Math.round(n * 100) / 100).toFixed(2);
 
 function openEditRoom() {
   if (DUBLAJ.site) return;
@@ -1554,9 +1782,9 @@ function renderLines() {
       <input value="${esc(l.text)}" placeholder="اكتب الجملة..." aria-label="السطر ${i + 1}">
       <button class="del" aria-label="احذف السطر">${icon('x')}</button>
       <div class="tm">
-        <button data-a="start">بداية = الحين</button><b class="${l.start == null ? 'none' : ''}">${sec(l.start)}</b>
+        <button data-a="start">بداية = الحين</button><input class="num" type="number" step="0.01" min="0" dir="ltr" data-k="start" value="${secIn(l.start)}" placeholder="—" aria-label="بداية السطر ${i + 1} بالثواني">
         <span>إلى</span>
-        <b class="${l.end == null ? 'none' : ''}">${sec(l.end)}</b><button data-a="end">نهاية = الحين</button>
+        <input class="num" type="number" step="0.01" min="0" dir="ltr" data-k="end" value="${secIn(l.end)}" placeholder="—" aria-label="نهاية السطر ${i + 1} بالثواني"><button data-a="end">نهاية = الحين</button>
         <button data-a="earlier" aria-label="أبكر">−٠٫١</button><button data-a="later" aria-label="أبطأ">+٠٫١</button>
       </div>
     </div>`).join('');
@@ -1568,6 +1796,19 @@ function renderLines() {
     };
     row.querySelector('input').onfocus = () => selectLine(l, false);
     row.querySelector('input').oninput = e => { l.text = e.target.value; edMark(); };
+    row.querySelectorAll('input.num').forEach(inp => {
+      inp.onkeydown = e => { if (e.key === 'Enter') inp.blur(); };
+      inp.onchange = () => {
+        const k = inp.dataset.k, val = inp.value.trim() === '' ? null : Math.round(+inp.value * 1000) / 1000;
+        const next = {start: l.start, end: l.end, [k]: val};
+        const bad = val != null && (!Number.isFinite(val) || val < 0 || val > ed.dur) ? `اكتب رقم بين 0 و ${secIn(ed.dur)}`
+          : next.start != null && next.end != null && next.end <= next.start ? 'النهاية لازم تكون بعد البداية' : '';
+        if (bad) { toast(bad); inp.value = secIn(l[k]); return; }
+        l[k] = val; ed.sel = l; edMark();
+        $('#lns').querySelectorAll('.ln').forEach(r => r.classList.toggle('sel', ed.lines[+r.dataset.i] === l));
+        if (val != null) ev.currentTime = val;
+      };
+    });
     row.querySelector('.del').onclick = () => {
       ed.lines.splice(ed.lines.indexOf(l), 1);
       if (!ed.lines.length) ed.lines.push({text: '', start: null, end: null});
@@ -1654,7 +1895,8 @@ function renderTrim() {
   $('#trimKeep').style.width = (pct(ed.trim.out) - pct(ed.trim.in)) + '%';
   $('#hIn').style.right = pct(ed.trim.in) + '%';
   $('#hOut').style.right = pct(ed.trim.out) + '%';
-  $('#trimRead').textContent = `من ${sec(ed.trim.in)} إلى ${sec(ed.trim.out)} ث (المدة ${sec(ed.trim.out - ed.trim.in)} ث)`;
+  $('#trimRead').textContent = `المدة ${sec(ed.trim.out - ed.trim.in)} ث`;
+  for (const [id, k] of [['#trimInNum', 'in'], ['#trimOutNum', 'out']]) if (document.activeElement !== $(id)) $(id).value = secIn(ed.trim[k]);
   ed.band.dur = ed.trim.out;
 }
 function timeAt(x) { const r = tb.getBoundingClientRect(); return Math.max(0, Math.min(ed.dur, (r.right - x) / r.width * ed.dur)); }
@@ -1673,6 +1915,15 @@ function moveDrag(t) {
   ev.currentTime = drag === 'in' ? ed.trim.in : drag === 'out' ? ed.trim.out : t;
 }
 $('#setIn').onclick = () => { ed.trim.in = Math.min(ev.currentTime, ed.trim.out - .5); edMark(); renderTrim(); };
+for (const [id, k] of [['#trimInNum', 'in'], ['#trimOutNum', 'out']]) {
+  $(id).onkeydown = e => { if (e.key === 'Enter') e.target.blur(); };
+  $(id).onchange = e => {
+    const t = Math.round(+e.target.value * 1000) / 1000;
+    const ok = e.target.value.trim() !== '' && Number.isFinite(t) && t >= 0 && t <= ed.dur && (k === 'in' ? t <= ed.trim.out - .5 : t >= ed.trim.in + .5);
+    if (!ok) { toast(k === 'in' ? `البداية بين 0 و ${secIn(ed.trim.out - .5)}` : `النهاية بين ${secIn(ed.trim.in + .5)} و ${secIn(ed.dur)}`); e.target.value = secIn(ed.trim[k]); return; }
+    ed.trim[k] = t; ev.currentTime = t; edMark(); renderTrim();
+  };
+}
 $('#setOut').onclick = () => { ed.trim.out = Math.max(ev.currentTime, ed.trim.in + .5); edMark(); renderTrim(); };
 
 /* per frame: playhead, timecode, stop at the scene end, live band */
@@ -1826,7 +2077,7 @@ const remote = (() => {
 const RS={role:null,room:'',peer:null,phase:'home',pending:null,vote:null,turn:null,take:null,upload:null,name:'',accepted:false,host:null,ended:false,revision:0,lastRevision:-1};
 const ROOM_ALPHABET='ABCDEFGHJKMNPQRSTUVWXYZ';
 const phaseText={home:'الشباب يجهّزون اللقطة الجاية',spin:'الشباب يختارون الكليب',watch:'الشباب يشوفون الأصلي',recording:'المايك شغّال عند الشباب',result:'وقت الدبلجة والتصويت',final:'قفلنا الاستوديو. يعطيك العافية!'};
-const turnText={watching:'يشوف الكليب',countdown:'يستعد للتسجيل',recording:'يسجّل',uploading:'يرفع التسجيل…'};
+const turnText={watching:'يشوف الكليب',countdown:'يستعد للتسجيل',recording:'يسجّل',paused:'وقّف يعيد جزء من تسجيله',processing:'يجهّز تسجيله',uploading:'يرفع التسجيل…'};
 function fire(event,payload={}) { return remote.send(event,payload).catch(()=>{ if(event==='vote') $('#seatVoteStatus').textContent='ما وصل التصويت، جرّب مرة ثانية'; }); }
 function remoteDubber(){return RS.role==='host' ? S.players.find(p=>p.remote && S.dubbers.includes(p.name)) : null;}
 function remotePhase(id){if(RS.role!=='host')return;const phase={'s-home':'home','s-spin':'spin','s-final':'final'}[id];if(phase)sendHostPhase(phase);}
@@ -1954,9 +2205,23 @@ async function seatRecord(){
     playDub(RS.take).catch(()=>toast('اضغط اسمع دبلجتك'));
   }catch(e){if(RS.turn!==turn)return;controls('c-seat');if(e.name!=='AbortError'){fire('take_failed',{takeId:turn.takeId,reason:'تعذّر التسجيل أو إذن المايك',to:RS.host});$('#seatTakeStatus').textContent='ما ضبط التسجيل. تأكد من المايك';}}
 }
-function extension(mime){return /mp4/i.test(mime)?'m4a':/ogg/i.test(mime)?'ogg':'webm';}
+async function seatPunch(){
+  if(!RS.turn||!RS.take||captureBusy||RS.sending)return;
+  const turn=RS.turn,entry=RS.take,at=v.currentTime;$('#seatPreview').hidden=true;tape.keep=true;
+  try{
+    const take=await captureTake(S.current,{hearBg:$('#seatHearBg').checked,status:seatStatus,base:basePass(entry),from:at});
+    if(RS.turn!==turn)return;
+    // same take id as before: drop the decoded copy of the old audio
+    bufCache.delete(entry.id);RS.take={...entry,...take};RS.upload=null;
+    if(typeof saveRecovery==='function')await saveRecovery();
+  }catch(e){if(RS.turn!==turn)return;if(e.name!=='AbortError')$('#seatTakeStatus').textContent='ما ضبط التسجيل. رجعنا لتسجيلك السابق';}
+  finally{tape.keep=false;}
+  controls('c-seat');$('#seatPreview').hidden=false;$('#seatTakeStatus').textContent='اسمعها، وإذا عجبتك أرسلها';
+  playDub(RS.take).catch(()=>toast('اضغط اسمع دبلجتك'));
+}
+function extension(mime){return /mp4/i.test(mime)?'m4a':/ogg/i.test(mime)?'ogg':/wav/i.test(mime)?'wav':'webm';}
 async function sendSeatTake(){
-  if(!RS.take||!RS.turn||RS.sending)return;const turn=RS.turn,take=RS.take;RS.sending=true;$('#seatSend').disabled=true;$('#seatRecord').disabled=true;$('#seatWatch').disabled=true;$('#seatReplay').disabled=true;$('#seatUpload').hidden=false;
+  if(!RS.take||!RS.turn||RS.sending)return;const turn=RS.turn,take=RS.take;RS.sending=true;$('#seatSend').disabled=true;$('#seatRecord').disabled=true;$('#seatWatch').disabled=true;$('#seatReplay').disabled=true;$('#seatPunch').disabled=true;$('#seatUpload').hidden=false;
   try{
     stopAll();seatStatus('uploading');$('#seatTakeStatus').textContent='يرفع التسجيل… خل الصفحة مفتوحة';
     if(!RS.upload){
@@ -1973,7 +2238,7 @@ async function sendSeatTake(){
     if(RS.turn!==turn)return;
     $('#seatTakeStatus').textContent='ما وصل التسجيل. دبلجتك محفوظة هنا، جرّب أرسلها مرة ثانية';
     fire('take_failed',{takeId:turn.takeId,reason:'تعذّر رفع التسجيل، يقدر يعيد الإرسال',to:RS.host});
-  }finally{RS.sending=false;$('#seatSend').disabled=false;$('#seatRecord').disabled=false;$('#seatWatch').disabled=false;$('#seatReplay').disabled=false;$('#seatUpload').hidden=true;}
+  }finally{RS.sending=false;$('#seatSend').disabled=false;$('#seatRecord').disabled=false;$('#seatWatch').disabled=false;$('#seatReplay').disabled=false;$('#seatPunch').disabled=false;$('#seatUpload').hidden=true;}
 }
 function cancelSeatTurn(notify=true){
   const turn=RS.turn;recCancelled=true;stopAll();RS.turn=null;RS.take=null;RS.upload=null;$('#seatResume').hidden=true;
@@ -2013,7 +2278,7 @@ function initRemote(){
   $('#seatLeave').onclick=async()=>{cancelSeatTurn();await remote.close();RS.role=null;RS.accepted=false;RS.host=null;$('#seatJoin').hidden=false;$('#seatConnected').hidden=true;show('s-setup');};
   $('#remoteCancel').onclick=()=>cancelHostTurn();$('#remoteSkip').onclick=()=>cancelHostTurn(true);$('#remoteRetry').onclick=requestRemoteTurn;
   $('#seatWatch').onclick=async()=>{stopAll();v.muted=false;await seekZero();v.play().catch(()=>toast('اضغط شوف الأصلي مرة ثانية'));seatStatus('watching');};
-  $('#seatRecord').onclick=seatRecord;$('#seatSend').onclick=sendSeatTake;$('#seatCancel').onclick=()=>cancelSeatTurn();
+  $('#seatRecord').onclick=seatRecord;$('#seatPunch').onclick=seatPunch;$('#seatSend').onclick=sendSeatTake;$('#seatCancel').onclick=()=>cancelSeatTurn();
   $('#seatResume').onclick=showSeatBooth;$('#seatReplay').onclick=()=>RS.take&&playDub(RS.take).catch(()=>toast('تعذّر تشغيل الدبلجة'));
   $('#clearRemoteTakes').onclick=async()=>{
     if(!confirm('تمسح التسجيلات المرفوعة لهالغرفة؟ احفظوا اللي تبونه أول.'))return;
@@ -2050,12 +2315,14 @@ function initRemote(){
     if(p.phase==='result'&&RS.turn?.takeId===p.takeId){cancelSeatTurn(false);seatWaiting('وصل التسجيل! الشباب يسمعونه الحين');}
   });
   remote.on('your_turn',receiveTurn);remote.on('vote_open',showSeatVote);
-  remote.on('turn_status',p=>{if(RS.role!=='host'||p.sender!==RS.peer||p.takeId!==RS.pending?.takeId||!turnText[p.status]||RS.pending.failed)return;$('#remoteStatus').textContent=`${RS.name} ${turnText[p.status]}`;});
+  remote.on('turn_status',p=>{if(RS.role!=='host'||p.sender!==RS.peer||p.takeId!==RS.pending?.takeId||!turnText[p.status]||RS.pending.failed)return;$('#remoteStatus').textContent=`${RS.name} ${turnText[p.status]}`;
+    // re-recording parts can outlast the clip: every status from the player restarts the deadline
+    clearTimeout(RS.pending.timer);RS.pending.timer=setTimeout(()=>failRemoteTurn('طوّل التسجيل. أعد الطلب أو تخطّ الدور'),(v.duration+90)*1000);});
   remote.on('take_failed',p=>{if(RS.role==='host'&&p.sender===RS.peer&&p.takeId===RS.pending?.takeId)failRemoteTurn(String(p.reason||'ما وصل التسجيل').slice(0,180));});
   remote.on('take_ready',async p=>{
     const pending=RS.pending;
     if(RS.role!=='host'||p.sender!==RS.peer||!pending||p.takeId!==pending.takeId||pending.loading)return;
-    if(!Number.isFinite(p.offset)||Math.abs(p.offset)>10||typeof p.mime!=='string'||!/^audio\/(webm|mp4|ogg)/.test(p.mime))return;
+    if(!Number.isFinite(p.offset)||Math.abs(p.offset)>10||typeof p.mime!=='string'||!/^audio\/(webm|mp4|ogg|wav)/.test(p.mime))return;
     pending.loading=true;
     try{
       const r=await fetch(remote.downloadUrl(p.path,p.signedUrl),{signal:AbortSignal.timeout(30000)});if(!r.ok)throw new Error('Download failed');
@@ -2093,5 +2360,6 @@ document.fonts && document.fonts.load('700 40px Marhey');
 </script>
 <script src="ensemble.js"></script>
 <script src="recovery.js"></script>
+<script src="studio.js"></script>
 </body>
 </html>

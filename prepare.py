@@ -243,6 +243,8 @@ def main():
                 timed.append({"start": round(max(0, a), 2), "end": round(min(clip_len, b), 2), "text": ln["text"].strip(), "character": ln.get("character", "")})
                 if "characters" in ln:
                     timed[-1]["characters"] = ln["characters"]
+                if ln.get("fx"):
+                    timed[-1]["fx"] = ln["fx"]
         if timing and timing.get("lines"):
             lines = "\n".join(str(ln.get("text", "")).strip() for ln in timing["lines"] if str(ln.get("text", "")).strip())
 

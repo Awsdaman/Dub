@@ -87,6 +87,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
 
 SAVE_LOCK = threading.Lock()
+# keep in step with FX in studio.js
+VOICE_FX = {"", "echo", "cave", "deep", "high", "robot", "radio"}
 
 
 def save_clip(body):
@@ -113,6 +115,11 @@ def save_clip(body):
                 raise ValueError("Choose up to two different characters per line")
             lines[-1]["characters"] = ids
             lines[-1]["character"] = ids[0] if ids else ""
+        fx = str(ln.get("fx") or "")
+        if fx not in VOICE_FX:
+            raise ValueError("Unknown voice effect")
+        if fx:
+            lines[-1]["fx"] = fx
 
     characters = body.get("characters", [])
     if not isinstance(characters, list) or not 1 <= len(characters) <= 12:
