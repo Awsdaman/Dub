@@ -2,6 +2,8 @@
 
 Current multi-player release: `node tests/ensemble.cjs` runs a host and two remote browsers against real Supabase, including recording, guide audio, role claims, votes, rejoin, failed-upload retry and local editor controls. It reads the ignored `config.local.json` and defaults to localhost:8765; set `GAME_URL` to test another deployment. The test injects a timed multi-character fixture in browser responses without modifying the owner's clips.
 
+Re-recording and studio features: `node tests/studio-features.cjs` runs a host and one remote browser against real Supabase. It stops a take mid-way, drags the band back, re-records one part (locally, from the result screen, and on the remote seat), checks the joined audio pass by pass, checks the WAV upload, plays a head-to-head with the +2 bonus, resets points, plays the bloopers, and uses the editing room's typed times and effect menu. Set `GAME_URL` to run it against the published site (the editing-room part is skipped there). `python tests/voice-fx-editor.py` checks in a temporary folder that per-line voice effects are saved, validated and reach `clips.json`.
+
 `python tests/character-editor.py` verifies character metadata persistence in an isolated temporary folder. Older single-seat test scripts below are historical coverage and use the previous selection flow.
 
 The game has no package/build dependency. Tests use a separate ignored `.test-tools` directory:

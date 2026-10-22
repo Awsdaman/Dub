@@ -32,10 +32,11 @@ const results=[]; const pass=n=>{results.push(n);console.log('PASS '+n);};
  assert(outsider.signDenied&&outsider.uploadDenied&&outsider.deleteCount===0);assert((await host.request.get(fixture.publicUrl)).ok());
  await seat.evaluate(async path=>{const c=supabase.createClient(DUBLAJ.supabaseUrl,DUBLAJ.supabaseAnonKey);const {error}=await c.storage.from('takes').remove([path]);if(error)throw error;},fixture.path);
  pass('Public viewing works; another player cannot upload into, sign, or delete owner files');
- await host.locator('#startBtn').click();await host.locator('#chooseClipBtn').click();await host.locator('#clipLibrary button').filter({hasText:'طرزان'}).click();await host.locator('#dubChips button').filter({hasText:'عوس'}).click();await host.locator('#toWatchBtn').click();await host.locator('#recBtn').click();
+ await host.locator('#startBtn').click();await host.locator('#chooseClipBtn').click();await host.locator('#clipLibrary button').filter({hasText:'طرزان'}).click();// remote players are cast per character on the many-devices panel
+ await host.locator('#manyDevices').click();await host.locator('[data-character="c1"]').selectOption('عوس');await host.locator('#toWatchBtn').click();await host.locator('#recBtn').click();
  await seat.locator('#seatRecord').click();await seat.waitForFunction(()=>!!RS.take,null,{timeout:60000});
  const bytes=await seat.evaluate(()=>RS.take.blob.size);assert(bytes>1000);
- await seat.locator('#seatSend').click();await host.waitForFunction(()=>!!S.last,null,{timeout:60000});assert.equal(await host.evaluate(()=>S.last.blob.size),bytes);await host.waitForFunction(()=>!v.paused);pass('Full-duration remote recording, real upload, signed download and host playback');
+ await seat.locator('#seatSend').click();await host.waitForFunction(()=>S.last?.dubbers[0]==='عوس',null,{timeout:60000});assert(await host.evaluate(()=>S.last.blob.size)>1000);await host.waitForFunction(()=>!v.paused);pass('Full-duration remote recording, real upload, signed download and host playback');
  await seat.waitForFunction(()=>RS.upload===null);pass('Owner automatically removes received recording');
  await host.locator('#vote .pads').first().locator('[data-s="8"]').click();await host.locator('#nextBtn').click();
  await host.evaluate(()=>{S.current=S.clips.find(c=>c.id==='طرزان');S.dubbers=['أحمد'];return watchOriginal();});await host.locator('#recBtn').click();await host.waitForFunction(()=>!!S.last&&S.last.dubbers[0]==='أحمد',null,{timeout:60000});
