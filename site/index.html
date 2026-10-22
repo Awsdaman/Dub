@@ -999,7 +999,7 @@ function drawBand(cv, B) {
     if (tw > room && room > 0) { fs = Math.max(rowHeight * .26, fs * room / tw); g.font = `700 ${fs}px Marhey`; }
     g.save();
     g.beginPath(); g.rect(x1 - Math.max(room, 30), rowTop, Math.max(room, 30) + 6, rowHeight); g.clip();
-    const assigned=!B.assigned||B.assigned.includes(ln.character);
+    const assigned=!B.assigned||(ln.characters||[ln.character]).some(id=>B.assigned.includes(id));
     g.fillStyle = t > ln.end ? 'rgba(27,24,20,.35)' : assigned ? '#1b1814' : '#776f60';
     g.fillText(ln.text, x1 - 4, rowMid);
     g.restore();
@@ -1653,7 +1653,7 @@ async function saveEdit() {
     openEditRoom();
   } catch (e) {
     console.error(e);
-    toast('ما انحفظ. تأكدوا إن نافذة 2-start-game مفتوحة وجرّبوا مرة ثانية');
+    toast(e instanceof TypeError ? 'ما قدرنا نتصل بالخادم. افتحوا 2-start-game وجرّبوا الحفظ مرة ثانية.' : 'تعذّر إكمال الحفظ: ' + e.message);
   } finally {
     btn.disabled = false; btn.querySelector('span').textContent = 'احفظ الكليب';
   }
