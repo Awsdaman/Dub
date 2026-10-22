@@ -1330,7 +1330,7 @@ async function playDub(entry, {exportFile = false} = {}) {
     const vs = v.captureStream ? v.captureStream() : v.mozCaptureStream();
     if(!vs.getVideoTracks().length)throw new Error('الفيديو مو جاهز للحفظ. شغّل المعاينة ثم جرّب مرة ثانية.');
     const stream = new MediaStream([...vs.getVideoTracks(), ...mixDest.stream.getAudioTracks()]);
-    const vm = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find(m => MediaRecorder.isTypeSupported(m));
+    const vm = ['video/mp4;codecs=avc1.42001E,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a.40.2', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find(m => MediaRecorder.isTypeSupported(m));
     if(!vm)throw new Error('المتصفح ما يدعم صيغة تنزيل الفيديو. جرّب Chrome أو Edge على الكمبيوتر.');
     rec = new MediaRecorder(stream, {mimeType: vm, videoBitsPerSecond: 6e6});
     rec.ondataavailable = e => e.data.size && chunks.push(e.data);
@@ -1388,8 +1388,9 @@ $('#saveBtn').onclick=async()=>{
     const blob=await playDub(entry,{exportFile:true});if(!blob)throw new Error('توقف تجهيز الفيديو. جرّب مرة ثانية.');
     if(readyDownload)URL.revokeObjectURL(readyDownload);
     readyDownload=URL.createObjectURL(blob);const link=$('#downloadLink');link.href=readyDownload;
-    link.download=`دوبلاج - ${entry.clip.title} - ${names(entry.dubbers)}.webm`;link.hidden=false;
-    status.textContent='الفيديو جاهز. إذا ما بدأ التنزيل، اضغط «نزّل الملف الجاهز». ';link.click();
+    const extension=blob.type.toLowerCase().startsWith('video/mp4')?'mp4':'webm';
+    link.download=`دوبلاج - ${entry.clip.title} - ${names(entry.dubbers)}.${extension}`;link.hidden=false;
+    status.textContent=(extension==='mp4'?'فيديو MP4 جاهز. ':'هذا المتصفح ما يدعم تصدير MP4؛ جهّزنا الفيديو بصيغة WebM. ')+'إذا ما بدأ التنزيل، اضغط «نزّل الملف الجاهز».';link.click();
   }catch(e){stopAll();console.error('Video download failed',e);status.textContent='ما اكتمل التنزيل: '+(e.message||'جرّب مرة ثانية.');}
   finally{clearInterval(timer);v.removeEventListener('playing',progress);downloadBusy=false;buttons.forEach(b=>b.disabled=false);}
 };
