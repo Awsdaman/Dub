@@ -2227,7 +2227,10 @@ async function sendSeatTake(){
     if(!RS.upload){
       // Supabase decodes percent escapes before validating keys; use a plain ASCII UUID.
       const path=RS.room+'/'+crypto.randomUUID()+'.'+extension(take.mime);
-      await remote.upload(path,take.blob);
+      // Until the bucket allows WAV (supabase/migrations/202610230001_wav_takes.sql), send joined takes
+      // under an allowed type; the host decodes the audio from its bytes, not from this label.
+      try{await remote.upload(path,take.blob);}
+      catch(e){if(!/wav/i.test(take.mime))throw e;await remote.upload(path,new Blob([take.blob],{type:'audio/webm'}));}
       if(RS.turn!==turn)return;
       RS.upload={takeId:turn.takeId,path,offset:take.offset,mime:take.mime};
     }
