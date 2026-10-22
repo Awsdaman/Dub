@@ -59,6 +59,7 @@ def export():
     (SITE / 'processed').mkdir()
     shutil.copy2(ROOT / 'index.html', SITE / 'index.html')
     shutil.copy2(ROOT / 'ensemble.js', SITE / 'ensemble.js')
+    shutil.copy2(ROOT / 'recovery.js', SITE / 'recovery.js')
     shutil.copytree(ROOT / 'fonts', SITE / 'fonts')
     (SITE / 'config.js').write_text('window.DUBLAJ = ' + json.dumps({'site': True, **public}, ensure_ascii=False) + ';\n', encoding='utf-8')
     exported = []

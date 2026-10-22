@@ -118,12 +118,23 @@ const oldWatch=watchOriginal;
 watchOriginal=async function(){await oldWatch();band.assigned=activeCharacters();if(E.session){const t=E.session.plan[E.session.index];$('#recBtn').innerHTML=icon('rec')+' دور '+esc(t.name);setWho([t.name]);toast('شخصياتك: '+charactersOf(S.current).filter(c=>t.characters.includes(c.id)).map(c=>c.name).join('، '));}};
 async function acceptEnsembleTake(take){
   const session=E.session;if(!session)return;
+  if(session.index>=session.plan.length)return finishEnsemble();
   const turn=session.plan[session.index];session.takes.push({...take,characters:turn.characters});session.index++;
-  if(session.index===session.plan.length){toast('نجهّز تسجيلك للتشغيل…');S.last=await combineTakes(session);E.session=null;showResult();return;}
+  if(typeof saveRecovery==='function')await saveRecovery();
+  if(session.index===session.plan.length){await finishEnsemble();return;}
   S.dubbers=[session.plan[session.index].name];await watchOriginal();toast('انحفظ الدور. الحين دور '+S.dubbers[0]);
+}
+async function finishEnsemble(){
+  if(E.mixing)return;
+  const session=E.session;if(!session||session.index<session.plan.length)return;
+  E.mixing=true;
+  try{toast('نجهّز تسجيلك للتشغيل…');const result=await combineTakes(session);if(E.session!==session)return;S.last=result;E.session=null;showResult();}
+  catch(e){console.error('Audio mixing failed',e);controls('c-watch');$('#recBtn').innerHTML=icon('replay')+' أعد تجهيز التسجيل';toast('التسجيلات موجودة. اضغط أعد تجهيز التسجيل بدون ما تسجّل من جديد.');}
+  finally{E.mixing=false;}
 }
 record=async function(){
   if(captureBusy)return;
+  if(E.session&&E.session.index>=E.session.plan.length)return finishEnsemble();
   if(RS.vote){fire('vote_closed',{takeId:RS.vote.takeId,avg:null});RS.vote=null;}
   if(E.session)E.session.duration=v.duration;
   if(remoteDubber())return requestRemoteTurn();
