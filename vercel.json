@@ -5,7 +5,7 @@
   "installCommand": "",
   "outputDirectory": "site",
   "headers": [
-    {"source": "/clips/(.*)", "headers": [{"key":"Cache-Control","value":"public, max-age=86400"}]},
-    {"source": "/processed/(.*)", "headers": [{"key":"Cache-Control","value":"public, max-age=86400"}]}
+    {"source": "/clips/(.*)", "headers": [{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]},
+    {"source": "/processed/(.*)", "headers": [{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]}
   ]
 }

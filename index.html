@@ -931,6 +931,11 @@ function setupBand(clip) {
 }
 function roundRect(g, x, y, w, h, r) { g.beginPath(); g.roundRect(x, y, w, h, r); }
 function drawBand(cv, B) {
+  const visibleTime=B.clock();
+  const sortedLines = [...B.texts].filter(l=>l.start<=visibleTime+7&&l.end>=visibleTime-4).sort((a,b)=>a.start-b.start), laneEnds=[], lineLanes=new Map();
+  for(const line of sortedLines){let lane=laneEnds.findIndex(end=>end<=line.start);if(lane<0)lane=laneEnds.length;laneEnds[lane]=line.end;lineLanes.set(line,lane);}
+  const laneCount=Math.max(1,laneEnds.length);
+  cv.style.height=laneCount>1?`${Math.max(140, laneCount*72+40)}px`:'';
   const W = cv.clientWidth, H = cv.clientHeight, dpr = devicePixelRatio || 1;
   if (!W) return;
   if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) {
@@ -969,33 +974,38 @@ function drawBand(cv, B) {
     }
   }
   // the original speech, in wax pencil
-  const bh = (bot - top) * .5, wax = B.live ? 'rgba(255,42,31,' : 'rgba(245,197,24,';
+  const rowHeight=(bot-top)/laneCount;
+  const bh = rowHeight * .5, wax = B.live ? 'rgba(255,42,31,' : 'rgba(245,197,24,';
   for (const [a, b] of B.blocks) {
     const x1 = X(a), x2 = X(b);
     if (x1 < 0 || x2 > W) continue;
     const now = t >= a && t <= b;
     g.fillStyle = wax + (now ? '.95)' : t > b ? '.28)' : '.6)');
-    roundRect(g, x2, mid - bh / 2 + H * .05, Math.max(4, x1 - x2), bh, bh / 2); g.fill();
+    const match=sortedLines.find(l=>l.start===a&&l.end===b), row=lineLanes.get(match)||0;
+    roundRect(g, x2, top+rowHeight*(row+.5)-bh/2, Math.max(4, x1-x2), bh, bh/2); g.fill();
   }
   // the lines, written right to left so the first word reaches the bar first
   g.direction = 'rtl'; g.textAlign = 'right'; g.textBaseline = 'middle';
-  const texts = [...B.texts].sort((p, q) => p.start - q.start);
+  const texts = sortedLines;
   texts.forEach((ln, i) => {
     const x1 = X(ln.start);
-    const room = ((texts[i + 1] ? texts[i + 1].start : ln.start + 12) - ln.start) * pps - 10;
+    const row=lineLanes.get(ln), next=texts.slice(i+1).find(l=>lineLanes.get(l)===row);
+    const room = ((next ? next.start : ln.start + 12) - ln.start) * pps - 10;
+    const rowTop=top+row*rowHeight, rowMid=rowTop+rowHeight*.55;
     if (x1 < -20 || x1 - room > W + 40) return;
-    let fs = (bot - top) * .5;
+    let fs = rowHeight * .45;
     g.font = `700 ${fs}px Marhey`;
     const tw = g.measureText(ln.text).width;
-    if (tw > room && room > 0) { fs = Math.max((bot - top) * .26, fs * room / tw); g.font = `700 ${fs}px Marhey`; }
+    if (tw > room && room > 0) { fs = Math.max(rowHeight * .26, fs * room / tw); g.font = `700 ${fs}px Marhey`; }
     g.save();
-    g.beginPath(); g.rect(x1 - Math.max(room, 30), top, Math.max(room, 30) + 6, bot - top); g.clip();
-    g.fillStyle = t > ln.end ? 'rgba(27,24,20,.35)' : '#1b1814';
-    g.fillText(ln.text, x1 - 4, mid + H * .05);
+    g.beginPath(); g.rect(x1 - Math.max(room, 30), rowTop, Math.max(room, 30) + 6, rowHeight); g.clip();
+    const assigned=!B.assigned||B.assigned.includes(ln.character);
+    g.fillStyle = t > ln.end ? 'rgba(27,24,20,.35)' : assigned ? '#1b1814' : '#776f60';
+    g.fillText(ln.text, x1 - 4, rowMid);
     g.restore();
     if (B.sel === ln) {
       g.strokeStyle = '#ff2a1f'; g.lineWidth = 3;
-      roundRect(g, X(ln.end) - 4, top + 6, Math.max(8, (ln.end - ln.start) * pps + 8), bot - top - 12, 10); g.stroke();
+      roundRect(g, X(ln.end) - 4, rowTop + 3, Math.max(8, (ln.end - ln.start) * pps + 8), rowHeight - 6, 6); g.stroke();
     }
   });
   // countdown wipes before the take
@@ -1218,7 +1228,7 @@ async function captureTake(clip, {hearBg = false, status = () => {}} = {}) {
     if (!await enterBooth(clip)) throw new Error('ما قدرنا نشغّل الفيديو');
     controls('c-record'); setWho(S.dubbers); v.muted = true;
     await seekZero(); cancelled();
-    const bg = clip.bg && hearBg ? await getBuffer(clip.bg, url(clip.bg)).catch(() => null) : null;
+    const bg = hearBg ? await recordingGuide(clip, activeCharacters()) : null;
     cancelled(); status('countdown');
     const c0 = performance.now(); band.countdown = true; band.live = true;
     band.clock = () => (performance.now() - c0) / 1000 - 3; lamp('on blink');
@@ -1280,10 +1290,7 @@ async function playDub(entry, {exportFile = false} = {}) {
   band.clock = () => v.currentTime; band.countdown = false; band.live = false;
   const voice = await getBuffer(entry.id, entry.blob);
   const tracks = [{buf: voice, gain: voiceGain, offset: entry.offset - entry.adjust / 1000}];
-  if (entry.clip.bg) {
-    const bg = await getBuffer(entry.clip.bg, url(entry.clip.bg)).catch(() => null);
-    if (bg) tracks.push({buf: bg, gain: bgGain});
-  }
+  tracks.push({buf: await recordingGuide(entry.clip,entry.characters||null), gain: bgGain});
   if (token !== playToken) return;
 
   let rec, chunks = [];
@@ -1471,7 +1478,7 @@ async function editClip(c) {
   ed.dur = ev.duration || 0;
   ed.trim = c.edit && c.edit.trim ? {...c.edit.trim} : {in: 0, out: ed.dur};
   if (c.edit && c.edit.lines && c.edit.lines.length) ed.lines = c.edit.lines.map(l => ({...l}));
-  else if (c.timed && c.timed.length) ed.lines = c.timed.map(l => ({text: l.text, start: l.start, end: l.end}));
+  else if (c.timed && c.timed.length) ed.lines = c.timed.map(l => ({...l}));
   else ed.lines = (c.lines || '').split(/\r?\n/).map(t => t.trim()).filter(Boolean).map(text => ({text, start: null, end: null}));
   if (!ed.lines.length) ed.lines.push({text: '', start: null, end: null});
   ed.sel = ed.lines.find(l => l.start == null) || ed.lines[0];
@@ -1498,7 +1505,7 @@ function renderLines() {
   $('#lns').querySelectorAll('.ln').forEach(row => {
     const l = ed.lines[+row.dataset.i];
     row.onclick = e => {
-      if (e.target.closest('input,button')) return;
+      if (e.target.closest('input,button,select')) return;
       selectLine(l, true);
     };
     row.querySelector('input').onfocus = () => selectLine(l, false);
@@ -1636,7 +1643,7 @@ async function saveEdit() {
   toast(trimmed ? 'يقص المشهد ويشيل الأصوات... لحظات' : 'يحفظ...');
   try {
     const r = await fetch('api/clip', {method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({id: c.id, trim: trimmed ? ed.trim : null, lines})});
+      body: JSON.stringify({id: c.id, trim: trimmed ? ed.trim : null, lines, characters:ed.characters})});
     const res = await r.json();
     if (!res.ok) throw new Error(res.error || 'save');
     bufCache.clear(); delete v.dataset.clip;
@@ -1739,6 +1746,7 @@ const remote = (() => {
   return {
     ready,open,close,send,
     on(e,fn){listeners.set(e,[...(listeners.get(e)||[]),fn]);},
+    replace(e,fn){listeners.set(e,[fn]);},
     online(id){return connected && peers.some(p=>!id||p.id===id);},
     async upload(path,blob){checkPath(path);const {error}=await client.storage.from('takes').upload(userId+'/'+path,blob,{contentType:blob.type,upsert:false});if(error)throw error;},
     async sign(path){checkPath(path);const {data,error}=await client.storage.from('takes').createSignedUrl(userId+'/'+path,120);if(error)throw error;return data.signedUrl;},
@@ -1882,7 +1890,7 @@ async function seatRecord(){
   try{
     const take=await captureTake(S.current,{hearBg:$('#seatHearBg').checked,status:seatStatus});
     if(RS.turn!==turn)return;
-    RS.take={id:turn.takeId,clip:S.current,dubbers:[RS.name],...take,adjust:0,score:null};RS.upload=null;
+    RS.take={id:turn.takeId,clip:S.current,dubbers:[RS.name],characters:activeCharacters(),...take,adjust:0,score:null};RS.upload=null;
     controls('c-seat');$('#seatPreview').hidden=false;$('#seatRecord').classList.remove('big');$('#seatRecord').textContent='سجّل من جديد';
     $('#seatTakeStatus').textContent='اسمعها، وإذا عجبتك أرسلها';
     playDub(RS.take).catch(()=>toast('اضغط اسمع دبلجتك'));
@@ -2025,5 +2033,6 @@ initRemote();
 counter($('#takeNo'), pad2(S.round));
 document.fonts && document.fonts.load('700 40px Marhey');
 </script>
+<script src="ensemble.js"></script>
 </body>
 </html>

@@ -58,6 +58,7 @@ def export():
     (SITE / 'clips').mkdir(parents=True)
     (SITE / 'processed').mkdir()
     shutil.copy2(ROOT / 'index.html', SITE / 'index.html')
+    shutil.copy2(ROOT / 'ensemble.js', SITE / 'ensemble.js')
     shutil.copytree(ROOT / 'fonts', SITE / 'fonts')
     (SITE / 'config.js').write_text('window.DUBLAJ = ' + json.dumps({'site': True, **public}, ensure_ascii=False) + ';\n', encoding='utf-8')
     exported = []
@@ -68,7 +69,7 @@ def export():
                         '-map', '0:v:0', '-map', '0:a:0?', '-vf', "scale=w='min(1280,iw)':h=-2",
                         '-c:v', 'libx264', '-crf', '26', '-preset', 'medium', '-pix_fmt', 'yuv420p',
                         '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', str(target)], check=True)
-        out = {k: c[k] for k in ('id', 'title', 'voices', 'lines', 'speech', 'timed') if k in c}
+        out = {k: c[k] for k in ('id', 'title', 'voices', 'characters', 'lines', 'speech', 'timed') if k in c}
         out['video'] = target.relative_to(SITE).as_posix()
         for k, suffix in [('bg', '.bg.mp3'), ('thumb', '.jpg')]:
             out[k] = None
@@ -79,8 +80,8 @@ def export():
         exported.append(out)
     (SITE / 'clips.json').write_text(json.dumps(exported, ensure_ascii=False, indent=2), encoding='utf-8')
     (SITE / 'vercel.json').write_text(json.dumps({'headers': [
-        {'source': '/clips/(.*)', 'headers': [{'key': 'Cache-Control', 'value': 'public, max-age=86400'}]},
-        {'source': '/processed/(.*)', 'headers': [{'key': 'Cache-Control', 'value': 'public, max-age=86400'}]}
+        {'source': '/clips/(.*)', 'headers': [{'key': 'Cache-Control', 'value': 'public, max-age=0, must-revalidate'}]},
+        {'source': '/processed/(.*)', 'headers': [{'key': 'Cache-Control', 'value': 'public, max-age=0, must-revalidate'}]}
     ]}, indent=2), encoding='utf-8')
     too_large = False
     for p in sorted(SITE.rglob('*')):

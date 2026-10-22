@@ -1,0 +1,43 @@
+const {chromium}=require('../.test-tools/node_modules/playwright'),fs=require('fs'),assert=require('assert');
+const config=JSON.parse(fs.readFileSync('config.local.json','utf8'));
+const report=[];const pass=n=>{report.push(n);console.log('PASS '+n);};
+(async()=>{
+ const b=await chromium.launch({channel:'chrome',headless:true,args:['--use-fake-device-for-media-stream','--use-fake-ui-for-media-stream','--autoplay-policy=no-user-gesture-required']});
+ try{
+ const errors=[];
+ async function page(){const c=await b.newContext({permissions:['microphone'],viewport:{width:1280,height:1000}}),p=await c.newPage();p.on('pageerror',e=>errors.push(e.message));
+   await p.route('**/config.js',r=>r.fulfill({contentType:'application/javascript',body:'window.DUBLAJ='+JSON.stringify({site:false,...config})}));
+   await p.route('**/clips.json',async r=>{const data=await(await r.fetch()).json();const clip=data.find(c=>c.id==='طرزان');clip.characters=[1,2,3,4].map(i=>({id:'c'+i,name:'شخصية '+i}));clip.voices=4;clip.timed=[{start:.2,end:2,text:'السطر الأول',character:'c1'},{start:1,end:3,text:'سطر متداخل',character:'c2'},{start:3,end:4,text:'دور ثالث',character:'c3'},{start:4,end:5,text:'شخصية ثانية لنفس اللاعب',character:'c4'}];await r.fulfill({json:data});});
+   await p.goto(process.env.GAME_URL||'http://127.0.0.1:8765/');await p.waitForFunction(()=>S.clips.length>0&&typeof E!=='undefined');return p;}
+ const h=await page(),a=await page(),z=await page();
+ await h.locator('#pname').fill('المضيف');await h.locator('#addForm button').click();await h.locator('#remoteToggle').check();await h.locator('#hostConnect').click();await h.waitForFunction(()=>RS.room&&document.querySelector('#roomCode').textContent);
+ const room=await h.locator('#roomCode').textContent();
+ for(const [p,name] of [[a,'الأول'],[z,'الثاني']]){await p.locator('#joinSeatBtn').click();await p.locator('#seatRoom').fill(room);await p.locator('#seatName').fill(name);await p.locator('#seatJoinKey').click();await p.waitForFunction(()=>RS.accepted);}
+ await h.waitForFunction(()=>E.peers.size===2);pass('Two independent remote players join one host');
+ await h.locator('#startBtn').click();await h.locator('#chooseClipBtn').click();await h.locator('#clipLibrary button').filter({hasText:'طرزان'}).click();await h.locator('#manyDevices').click();
+ await h.locator('[data-character="c1"]').selectOption('المضيف');
+ await a.locator('[data-char="c2"]').click();await a.locator('[data-char="c4"]').click();await z.locator('[data-char="c3"]').click();
+ await h.waitForFunction(()=>E.assign.c2==='الأول'&&E.assign.c3==='الثاني'&&E.assign.c4==='الأول');pass('Remote character claims, one player takes multiple characters');
+ await h.screenshot({path:'tests/artifacts/ensemble-cast-desktop.png'});await h.setViewportSize({width:375,height:812});assert(await h.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await h.screenshot({path:'tests/artifacts/ensemble-cast-mobile.png',fullPage:true});await h.setViewportSize({width:1280,height:1000});
+ await h.locator('#toWatchBtn').click();await h.waitForFunction(()=>v.duration>0);await h.screenshot({path:'tests/artifacts/ensemble-overlap.png'});assert(await h.locator('#band').evaluate(c=>c.clientHeight>=180));
+ await h.locator('#recBtn').click();await h.waitForFunction(()=>E.session?.index===1,null,{timeout:60000});pass('First local take collected without ending the ensemble');
+ await h.locator('#recBtn').click();await a.locator('#seatRecord').click();await a.waitForFunction(()=>!!RS.take,null,{timeout:60000});await a.locator('#seatSend').click();await h.waitForFunction(()=>E.session?.index===2,null,{timeout:60000});
+ await h.locator('#recBtn').click();await z.locator('#seatRecord').click();await z.waitForFunction(()=>!!RS.take,null,{timeout:60000});await z.locator('#seatSend').click();await h.waitForFunction(()=>!!S.last&&S.last.dubbers.length===3,null,{timeout:60000});await h.waitForFunction(()=>!v.paused);
+ assert.equal(await h.evaluate(()=>S.last.blob.type),'audio/wav');assert.equal(await h.evaluate(()=>E.session),null);pass('Three sequential takes mixed, with two remote uploads and final playback');
+ const audio=await h.evaluate(async()=>{const clip=S.current,ids=['c1'];const guide=await recordingGuide(clip,ids),original=await getBuffer('original:'+clip.video,url(clip.video)),bg=await getBuffer(clip.bg,url(clip.bg));const at=(b,t)=>b.getChannelData(0)[Math.floor(t*b.sampleRate)];return {outside:Math.abs(at(guide,6)-at(original,6)),inside:Math.abs(at(guide,1.5)-at(bg,1.5))};});assert(audio.outside<.0001&&audio.inside<.0001);pass('Guide retains original outside assigned lines and music during overlapping assigned lines');
+ await h.locator('#vote .pads button[data-s="8"]').first().click();await h.locator('#nextBtn').click();
+ await h.locator('#chooseClipBtn').click();await h.locator('#clipLibrary button').filter({hasText:'طرزان'}).click();await h.locator('#sharedDevice').click();await h.locator('#dubChips button').click();await h.locator('#toWatchBtn').click();await h.locator('#recBtn').click();await h.waitForFunction(()=>S.last?.dubbers.length===1,null,{timeout:60000});
+ await a.locator('#seatPads [data-score="8"]').click();await z.locator('#seatPads [data-score="9"]').click();await h.waitForFunction(()=>votes['الأول']===8&&votes['الثاني']===9);pass('One-device recording preserved; both remote players vote independently');
+ await h.locator('#nextBtn').click();await a.waitForFunction(()=>RS.vote.closed);await z.waitForFunction(()=>RS.vote.closed);
+ await h.locator('#chooseClipBtn').click();await h.locator('#clipLibrary button').filter({hasText:'طرزان'}).click();await h.locator('#manyDevices').click();
+ for(const [id,name] of [['c1','المضيف'],['c2','الأول'],['c3','الثاني'],['c4','الأول']])await h.locator('[data-character="'+id+'"]').selectOption(name);
+ await h.locator('#toWatchBtn').click();await h.locator('#recBtn').click();await h.waitForFunction(()=>E.session?.index===1,null,{timeout:60000});await h.locator('#recBtn').click();await a.waitForFunction(()=>!!RS.turn);
+ const takeId=await a.evaluate(()=>RS.turn.takeId);await a.reload();await a.locator('#joinSeatBtn').click();await h.waitForFunction(()=>!remote.online(RS.pending.peer));await a.locator('#seatJoinKey').click();await a.waitForFunction(()=>RS.accepted&&RS.turn);
+ assert.equal(await a.evaluate(()=>RS.turn.takeId),takeId);assert.deepEqual(await a.evaluate(()=>E.seatCharacters),['c2','c4']);assert.equal(await h.evaluate(()=>E.session.takes.length),1);pass('Reconnect resumes assigned characters without losing earlier takes');
+ await a.locator('#seatRecord').click();await a.waitForFunction(()=>!!RS.take,null,{timeout:60000});await a.route('**/storage/v1/object/takes/**',r=>r.request().method()==='POST'?r.fulfill({status:503,body:'test upload failure'}):r.continue());
+ await a.locator('#seatSend').click();await h.locator('#remoteRecovery').waitFor();assert(await a.evaluate(()=>!!RS.take));await a.unroute('**/storage/v1/object/takes/**');await a.locator('#seatSend').click();await h.waitForFunction(()=>E.session?.index===2,null,{timeout:60000});pass('Failed upload retains take; resend preserves previous ensemble tracks');
+ await z.context().close();await h.waitForFunction(()=>!remote.online(E.peers.get('الثاني')));await h.locator('#recBtn').click();await h.locator('#remoteRecovery').waitFor();assert.equal(await h.evaluate(()=>E.session.takes.length),2);await h.locator('#remoteRetry').click();await h.locator('#remoteRecovery').waitFor();await h.locator('#remoteSkip').click();assert.equal(await h.evaluate(()=>E.session),null);pass('Disconnected next player can retry or cancel the clip without corrupting completed results');
+ await h.evaluate(()=>openEditRoom());await h.evaluate(()=>editClip(S.clips.find(c=>c.id==='طرزان')));assert.equal(await h.locator('#editCharacters input').count(),4);await h.locator('#addCharacter').click();assert.equal(await h.locator('#editCharacters input').count(),5);await h.locator('.line-character').first().selectOption('c2');assert.equal(await h.evaluate(()=>ed.lines[0].character),'c2');pass('Local character editor and subtitle assignment');
+ assert.deepEqual(errors,[]);pass('No browser errors');
+ }finally{await b.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;}).finally(()=>fs.writeFileSync('tests/artifacts/ensemble-results.json',JSON.stringify({report,success:!process.exitCode},null,2)));

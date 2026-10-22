@@ -1,5 +1,9 @@
 # Remote-seat test harness
 
+Current multi-player release: `node tests/ensemble.cjs` runs a host and two remote browsers against real Supabase, including recording, guide audio, role claims, votes, rejoin, failed-upload retry and local editor controls. It reads the ignored `config.local.json` and defaults to localhost:8765; set `GAME_URL` to test another deployment. The test injects a timed multi-character fixture in browser responses without modifying the owner's clips.
+
+`python tests/character-editor.py` verifies character metadata persistence in an isolated temporary folder. Older single-seat test scripts below are historical coverage and use the previous selection flow.
+
 The game has no package/build dependency. Tests use a separate ignored `.test-tools` directory:
 
 ```powershell

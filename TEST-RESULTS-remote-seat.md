@@ -1,5 +1,24 @@
 # Remote-seat build and test results
 
+## Multi-device update — 22 October 2026
+
+`tests/ensemble.cjs` passed **11 checks** with a host and two isolated remote Chrome contexts using real Supabase:
+
+- Multiple remote joins, role claims, and multiple characters assigned to one player.
+- Local first take, two sequential remote takes, aligned combined WAV and playback.
+- Original soundtrack outside assigned lines; music/effects during assigned lines, including overlaps (sample-value assertions).
+- One-device recording and independent remote votes.
+- Reconnect restores the pending character assignment and retains previous takes.
+- Failed upload retains the take; resend continues the ensemble.
+- Offline next player supports retry and abandoning the clip.
+- Local editor character controls and per-line assignment; no browser errors.
+
+Desktop/mobile role selection and overlapping subtitle lanes were visually reviewed. An isolated Python check verified that character names, overlapping times and speaker IDs persist; invalid IDs are rejected without overwriting saved data. This test does not touch the owner's clips.
+
+The recording checks use synthetic microphone audio. Physical devices, real microphones and human listening quality still need the owner rehearsal. Existing clips need explicit character assignments and timed lines before multi-device dubbing is enabled; one-device mode remains available.
+
+The prior single-seat harnesses below describe the earlier release; use `tests/ensemble.cjs` for the current role-selection flow. No Supabase schema or storage-policy changes were needed for this update.
+
 Date: 21 October 2026.
 Live website: https://dub-ashen-ten.vercel.app/
 Repository: https://github.com/Awsdaman/Dub

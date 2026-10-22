@@ -29,7 +29,10 @@ The SQL migrations in supabase/migrations reproduce these settings on a fresh pr
 1. Add source videos to clips/ and run 1-prepare-clips.bat.
 2. Open 2-start-game.bat, trim clips and adjust timings in غرفة المونتاج.
 3. Finish saving before running 3-export-site.bat.
-4. Commit and push the updated site/ to GitHub.
+4. Run 4-publish-site.bat to export, commit the website/manifest, and push to GitHub.
+
+For character names, per-line assignment, overlapping subtitle timing, and exact publishing steps, see [LOCAL-EDITING.md](LOCAL-EDITING.md).
+The multi-device mode accepts several remote players and collects their assigned character takes sequentially. A player may perform multiple characters. One-device mode keeps the shared-microphone flow.
 
 The ignored config.local.json holds the public Supabase URL/key used by the exporter. Keep it when exporting.
 site/config.js intentionally publishes these browser-safe values. Root config.js disables remote play in the local editing version.

@@ -234,12 +234,17 @@ def main():
             a = float(ln["start"]) - t0
             b = float(ln["end"]) - t0 if ln.get("end") is not None else a + 1.5
             if b > 0 and a < clip_len:
-                timed.append({"start": round(max(0, a), 2), "end": round(min(clip_len, b), 2), "text": ln["text"].strip()})
+                timed.append({"start": round(max(0, a), 2), "end": round(min(clip_len, b), 2), "text": ln["text"].strip(), "character": ln.get("character", "")})
         if timing and timing.get("lines"):
             lines = "\n".join(str(ln.get("text", "")).strip() for ln in timing["lines"] if str(ln.get("text", "")).strip())
 
         m = re.search(r"[\(\[]\s*(\d)\s*[\)\]]\s*$", stem)
         voices = int(m.group(1)) if m else 1
+        characters = (timing or {}).get("characters") or [{"id": f"c{i+1}", "name": f"شخصية {i+1}"} for i in range(voices)]
+        voices = len(characters)
+        if voices == 1:
+            for line in timed:
+                line["character"] = characters[0]["id"]
         title = re.sub(r"[\(\[]\s*\d\s*[\)\]]\s*$", "", stem).strip() or stem
         title = re.sub(r"(?<=\S)[-_](?=\S)", " ", title)
 
@@ -247,6 +252,7 @@ def main():
             "id": stem,
             "title": title,
             "voices": voices,
+            "characters": characters,
             "video": rel(video),
             "bg": rel(bg) if bg.exists() else None,
             "thumb": rel(thumb) if thumb.exists() else None,

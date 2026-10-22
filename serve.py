@@ -106,7 +106,18 @@ def save_clip(body):
         if not text:
             continue
         num = lambda k: None if ln.get(k) is None else round(float(ln[k]), 3)
-        lines.append({"text": text, "start": num("start"), "end": num("end")})
+        lines.append({"text": text, "start": num("start"), "end": num("end"), "character": str(ln.get("character", ""))})
+
+    characters = body.get("characters", [])
+    if not isinstance(characters, list) or not 1 <= len(characters) <= 12:
+        if "characters" in body:
+            raise ValueError("Choose between 1 and 12 characters")
+        characters = []  # Preserve compatibility with older editor clients.
+    characters = [{"id": str(c["id"]), "name": str(c["name"]).strip()} for c in characters]
+    if any(not c["id"] or not c["name"] for c in characters) or len({c["id"] for c in characters}) != len(characters):
+        raise ValueError("Invalid character names or IDs")
+    if characters and any(l["character"] and l["character"] not in {c["id"] for c in characters} for l in lines):
+        raise ValueError("Unknown subtitle character")
 
     trim = body.get("trim")
     if trim:
@@ -117,7 +128,7 @@ def save_clip(body):
     with SAVE_LOCK:
         # written before the cut so the fresh cut is newer than its timing file
         (prepare.CLIPS / f"{stem}.timing.json").write_text(
-            json.dumps({"trim": trim, "lines": lines}, ensure_ascii=False, indent=1), encoding="utf-8")
+            json.dumps({"trim": trim, "lines": lines, "characters": characters}, ensure_ascii=False, indent=1), encoding="utf-8")
         if trim:
             if not original:
                 prepare.ORIGINALS.mkdir(exist_ok=True)
