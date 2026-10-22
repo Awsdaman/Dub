@@ -681,6 +681,15 @@ const S = {
 const v = $('#v');
 let ctx, mixDest, voiceGain, bgGain, micStream;
 const bufCache = new Map();
+const bufferSizes = new Map();
+function trimAudioCache() {
+  for (const key of bufferSizes.keys()) if (!bufCache.has(key)) bufferSizes.delete(key);
+  let bytes = [...bufferSizes.values()].reduce((a,b)=>a+b,0);
+  for (const key of bufCache.keys()) {
+    if (bytes <= 64*1024*1024 && bufCache.size <= 6) break;
+    bytes -= bufferSizes.get(key)||0; bufferSizes.delete(key); bufCache.delete(key);
+  }
+}
 let playing = [];
 let playToken = 0;
 
@@ -821,13 +830,16 @@ function meterLoop(stream) {
   })();
 }
 async function getBuffer(key, src) {
-  if (bufCache.has(key)) return bufCache.get(key);
+  if (bufCache.has(key)) { const cached=bufCache.get(key); bufCache.delete(key); bufCache.set(key,cached); return cached; }
   const p = (async () => {
-    const data = src instanceof Blob ? await src.arrayBuffer() : await (await fetch(src)).arrayBuffer();
+    let data;
+    if (src instanceof Blob) data=await src.arrayBuffer();
+    else { const response=await fetch(src,{signal:AbortSignal.timeout(30000)}); if(!response.ok)throw new Error('تعذّر تحميل الصوت'); data=await response.arrayBuffer(); }
     return await ctx.decodeAudioData(data);
   })();
   bufCache.set(key, p);
-  try { return await p; } catch (e) { bufCache.delete(key); throw e; }
+  trimAudioCache();
+  try { const buffer=await p; if(bufCache.get(key)===p){bufferSizes.set(key,buffer.length*buffer.numberOfChannels*4);trimAudioCache();} return buffer; } catch (e) { if(bufCache.get(key)===p)bufCache.delete(key); bufferSizes.delete(key); throw e; }
 }
 function startBuffer(buf, gain, offset) {
   const n = ctx.createBufferSource(); n.buffer = buf; n.connect(gain);
@@ -836,7 +848,7 @@ function startBuffer(buf, gain, offset) {
 }
 function stopAll() {
   playToken++;
-  for (const n of playing) { try { n.stop(); } catch {} }
+  for (const n of playing) { try { n.stop(); } catch {} n.disconnect(); n.buffer=null; }
   playing = [];
   v.pause();
   flushEnded();
@@ -881,7 +893,14 @@ async function playVideoWith(tracks) {
 let endWaiters = [];
 const flushEnded = () => { const w = endWaiters; endWaiters = []; w.forEach(r => r()); };
 v.addEventListener('ended', flushEnded);
-const ended = () => new Promise(r => endWaiters.push(r));
+const ended = () => new Promise(resolve => {
+  let timer;
+  const finish=()=>{clearInterval(timer);endWaiters=endWaiters.filter(r=>r!==finish);resolve();};
+  endWaiters.push(finish);
+  // Some browsers miss the ended event on the final frame. Poll the media
+  // position too, without treating network stalls earlier in the clip as done.
+  timer=setInterval(()=>{if(v.ended||(Number.isFinite(v.duration)&&v.duration>0&&v.currentTime>=v.duration-.05))finish();},250);
+});
 
 /* burnt-in timecode */
 (function tcLoop() {
@@ -999,7 +1018,7 @@ function drawBand(cv, B) {
     if (tw > room && room > 0) { fs = Math.max(rowHeight * .26, fs * room / tw); g.font = `700 ${fs}px Marhey`; }
     g.save();
     g.beginPath(); g.rect(x1 - Math.max(room, 30), rowTop, Math.max(room, 30) + 6, rowHeight); g.clip();
-    const assigned=!B.assigned||B.assigned.includes(ln.character);
+    const assigned=!B.assigned||(ln.characters||[ln.character]).some(id=>B.assigned.includes(id));
     g.fillStyle = t > ln.end ? 'rgba(27,24,20,.35)' : assigned ? '#1b1814' : '#776f60';
     g.fillText(ln.text, x1 - 4, rowMid);
     g.restore();
@@ -1249,7 +1268,7 @@ async function captureTake(clip, {hearBg = false, status = () => {}} = {}) {
     const offset = (performance.now()-t0)/1000-v.currentTime;
     band.clock = () => v.currentTime;
     if (bg) startBuffer(bg,bgGain,v.currentTime);
-    await done; cancelled(); await sleep(350); cancelled();
+    await done; cancelled(); status('processing'); lamp(''); await sleep(350); cancelled();
     localRecorder.stop(); await stopped; cancelled();
     const blob = new Blob(chunks,{type:localRecorder.mimeType || mime || 'audio/webm'});
     if (!blob.size) throw new Error('التسجيل طلع فاضي');
@@ -1312,6 +1331,7 @@ async function playDub(entry, {exportFile = false} = {}) {
       a.href = URL.createObjectURL(new Blob(chunks, {type: 'video/webm'}));
       a.download = `دوبلاج - ${entry.clip.title} - ${names(entry.dubbers)}.webm`;
       a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),60000);
       toast('انحفظ الفيديو في التنزيلات');
     }
   }
@@ -1653,7 +1673,7 @@ async function saveEdit() {
     openEditRoom();
   } catch (e) {
     console.error(e);
-    toast('ما انحفظ. تأكدوا إن نافذة 2-start-game مفتوحة وجرّبوا مرة ثانية');
+    toast(e instanceof TypeError ? 'ما قدرنا نتصل بالخادم. افتحوا 2-start-game وجرّبوا الحفظ مرة ثانية.' : 'تعذّر إكمال الحفظ: ' + e.message);
   } finally {
     btn.disabled = false; btn.querySelector('span').textContent = 'احفظ الكليب';
   }

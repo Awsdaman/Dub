@@ -17,6 +17,12 @@ import subprocess
 import sys
 from pathlib import Path
 
+# Windows launchers may inherit a legacy console encoding. Status messages must
+# never abort media processing (including when imported by the local server).
+for stream in (sys.stdout, sys.stderr):
+    if hasattr(stream, "reconfigure"):
+        stream.reconfigure(encoding="utf-8", errors="replace")
+
 ROOT = Path(__file__).resolve().parent
 CLIPS = ROOT / "clips"
 OUT = ROOT / "processed"
@@ -235,6 +241,8 @@ def main():
             b = float(ln["end"]) - t0 if ln.get("end") is not None else a + 1.5
             if b > 0 and a < clip_len:
                 timed.append({"start": round(max(0, a), 2), "end": round(min(clip_len, b), 2), "text": ln["text"].strip(), "character": ln.get("character", "")})
+                if "characters" in ln:
+                    timed[-1]["characters"] = ln["characters"]
         if timing and timing.get("lines"):
             lines = "\n".join(str(ln.get("text", "")).strip() for ln in timing["lines"] if str(ln.get("text", "")).strip())
 
@@ -245,6 +253,8 @@ def main():
         if voices == 1:
             for line in timed:
                 line["character"] = characters[0]["id"]
+                if "characters" in line:
+                    line["characters"] = [characters[0]["id"]]
         title = re.sub(r"[\(\[]\s*\d\s*[\)\]]\s*$", "", stem).strip() or stem
         title = re.sub(r"(?<=\S)[-_](?=\S)", " ", title)
 

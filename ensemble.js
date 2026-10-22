@@ -1,10 +1,12 @@
 /* Character casting and sequential ensemble recording. No framework or server required. */
 const E={mode:'shared',assign:{},peers:new Map(),session:null,seatCharacters:null,casting:false,revision:0};
+E.soloCharacter='';
 const charactersOf=c=>c.characters?.length?c.characters:Array.from({length:c.voices||1},(_,i)=>({id:'c'+(i+1),name:'شخصية '+(i+1)}));
+const lineCharacters=l=>Array.isArray(l.characters)?l.characters:l.character?[l.character]:[];
 function activeCharacters(){return RS.role==='seat'?E.seatCharacters:E.session?.plan[E.session.index]?.characters||null;}
 function assignedIntervals(clip,ids,duration){
   const chars=charactersOf(clip),lines=(clip.timed||[]).filter(l=>Number.isFinite(l.start)&&Number.isFinite(l.end)&&l.end>l.start);
-  if(lines.length)return lines.filter(l=>!ids||ids.includes(l.character||(chars.length===1?chars[0].id:''))).map(l=>[l.start,l.end]);
+  if(lines.length)return lines.filter(l=>!ids||(lineCharacters(l).length?lineCharacters(l):chars.length===1?[chars[0].id]:[]).some(id=>ids.includes(id))).map(l=>[l.start,l.end]);
   return ids?[]:[[0,duration]];
 }
 async function recordingGuide(clip,ids){
@@ -32,17 +34,22 @@ function wavBlob(buffer){
   return new Blob([bytes],{type:'audio/wav'});
 }
 async function combineTakes(session){
-  const decoded=await Promise.all(session.takes.map(t=>getBuffer(t.id,t.blob)));
   const rate=ctx.sampleRate,duration=session.duration,mix=ctx.createBuffer(1,Math.ceil(duration*rate),rate),dst=mix.getChannelData(0);
-  session.takes.forEach((take,k)=>{
-    const audio=decoded[k],ranges=assignedIntervals(session.clip,take.characters,duration);
-    for(let i=0;i<dst.length;i++){
-      const t=i/rate;if(!ranges.some(([a,b])=>t>=a&&t<b))continue;
+  for(const take of session.takes){
+    const audio=await getBuffer(take.id,take.blob),ranges=[];
+    for(const [a,b] of assignedIntervals(session.clip,take.characters,duration).sort((a,b)=>a[0]-b[0])){
+      if(ranges.length&&a<=ranges[ranges.length-1][1])ranges[ranges.length-1][1]=Math.max(b,ranges[ranges.length-1][1]);else ranges.push([a,b]);
+    }
+    const channels=Array.from({length:audio.numberOfChannels},(_,c)=>audio.getChannelData(c));
+    for(const [a,b] of ranges)for(let i=Math.max(0,Math.ceil(a*rate));i<Math.min(dst.length,Math.ceil(b*rate));i++){
+      if(i%131072===0)await new Promise(r=>setTimeout(r,0));
+      const t=i/rate;
       const j=Math.floor((t+take.offset)*audio.sampleRate);if(j<0||j>=audio.length)continue;
-      let x=0;for(let c=0;c<audio.numberOfChannels;c++)x+=audio.getChannelData(c)[j];
+      let x=0;for(const channel of channels)x+=channel[j];
       dst[i]+=x/audio.numberOfChannels;
     }
-  });
+    bufCache.delete(take.id);
+  }
   let peak=1;for(const x of dst)peak=Math.max(peak,Math.abs(x));if(peak>1)for(let i=0;i<dst.length;i++)dst[i]/=peak;
   return {id:session.clip.id+'-ensemble-'+Date.now(),clip:session.clip,dubbers:session.plan.map(p=>p.name),characters:session.plan.flatMap(p=>p.characters),blob:wavBlob(mix),offset:0,adjust:0,score:null};
 }
@@ -59,37 +66,52 @@ $('#remoteSetup h2').textContent='لاعبين من بعيد';
 $('#remoteName').maxLength=200;
 $('#hearBgWrap').lastChild.textContent=' اسمعوا الموسيقى والكلام خارج سطوركم (بالسماعة)';
 $('#seatHearBg').parentElement.lastChild.textContent=' اسمع الموسيقى والكلام خارج سطورك (بالسماعة)';
+$('#dubChips').insertAdjacentHTML('afterend','<div class="cast-panel" id="soloCasting" hidden><div class="cast-row"><label for="soloCharacter">اختار الشخصية اللي بتدبلجها</label><select id="soloCharacter"></select></div><p>سجّل سطور شخصيتك، وباقي الشخصيات تسمعها بأصواتها الأصلية. وقت تداخل الكلام مع سطورك تسمع الموسيقى والمؤثرات بس.</p></div>');
+function renderSoloCasting(){
+  const chars=S.current?charactersOf(S.current):[];
+  $('#soloCasting').hidden=E.mode!=='shared'||S.dubbers.length!==1||chars.length<2;
+  $('#soloCharacter').innerHTML='<option value="">اختار شخصيتك</option>'+chars.map(c=>`<option value="${esc(c.id)}" ${E.soloCharacter===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+}
+$('#soloCharacter').onchange=e=>{E.soloCharacter=e.target.value;};
 
 function castReady(){
   const chars=charactersOf(S.current),timed=S.current.timed||[];
-  return timed.length>0&&timed.every(l=>l.end>l.start&&(chars.length===1||chars.some(c=>c.id===l.character)))&&chars.every(c=>timed.some(l=>l.character===c.id||chars.length===1));
+  return timed.length>0&&timed.every(l=>l.end>l.start&&(chars.length===1||(lineCharacters(l).length&&lineCharacters(l).every(id=>chars.some(c=>c.id===id)))))&&chars.every(c=>timed.some(l=>lineCharacters(l).includes(c.id)||chars.length===1));
 }
 function renderCasting(){
   if(!S.current)return;
+  renderSoloCasting();
   $('#sharedDevice').classList.toggle('sel',E.mode==='shared');$('#manyDevices').classList.toggle('sel',E.mode==='multi');
   $('#sharedDevice').setAttribute('aria-pressed',E.mode==='shared');$('#manyDevices').setAttribute('aria-pressed',E.mode==='multi');
   $('#castRows').hidden=E.mode!=='multi';$('#dubChips').hidden=E.mode==='multi';
-  $('#castRows').innerHTML=charactersOf(S.current).map((c,i)=>`<div class="cast-row"><label for="cast-${i}">${esc(c.name)}</label><select id="cast-${i}" data-character="${esc(c.id)}"><option value="">مين يدبلجها؟</option>${S.players.map(p=>`<option value="${esc(p.name)}" ${E.assign[c.id]===p.name?'selected':''}>${esc(p.name)}${p.remote?' · عن بعد':''}</option>`).join('')}</select></div>`).join('');
+  $('#castRows').innerHTML=charactersOf(S.current).map((c,i)=>`<div class="cast-row"><label for="cast-${i}">${esc(c.name)}</label><select id="cast-${i}" data-character="${esc(c.id)}"><option value="">الصوت الأصلي</option>${S.players.map(p=>`<option value="${esc(p.name)}" ${E.assign[c.id]===p.name?'selected':''}>${esc(p.name)}${p.remote?' · عن بعد':''}</option>`).join('')}</select></div>`).join('');
   $('#castRows').querySelectorAll('select').forEach(el=>el.onchange=()=>{E.assign[el.dataset.character]=el.value;broadcastCast();});
-  $('#castHint').textContent=E.mode==='multi'&&!castReady()?'هذا الكليب يحتاج توقيت السطور وتحديد شخصية كل سطر في غرفة المونتاج المحلية.':E.mode==='multi'?'كل لاعب يقدر ياخذ أكثر من شخصية. اللي بعيد يقدر يختار من جهازه.':'';
+  $('#castHint').textContent=E.mode==='multi'&&!castReady()?'هذا الكليب يحتاج توقيت السطور وتحديد شخصية كل سطر في غرفة المونتاج المحلية.':E.mode==='multi'?'اختاروا الشخصيات اللي بتدبلجونها. الباقي يبقى بصوته الأصلي، واللي بعيد يقدر يختار من جهازه.':'';
 }
 function broadcastCast(){
   if(RS.role==='host')fire('casting',{clipId:S.current?.id,characters:S.current?charactersOf(S.current):[],assign:E.assign,open:E.casting&&E.mode==='multi',revision:++E.revision});
 }
 const oldSelectClip=selectClip;
-selectClip=function(c){E.session=null;E.assign={};E.casting=true;oldSelectClip(c);$('#recordQueue').textContent='';renderCasting();broadcastCast();};
+selectClip=function(c){E.session=null;E.assign={};E.soloCharacter='';E.casting=true;oldSelectClip(c);$('#recordQueue').textContent='';renderCasting();broadcastCast();};
 for(const [id,mode] of [['sharedDevice','shared'],['manyDevices','multi']])$('#'+id).onclick=()=>{E.mode=mode;renderCasting();broadcastCast();};
 renderDubChips=function(){
+  renderSoloCasting();
   $('#dubChips').innerHTML=S.players.filter(p=>!p.remote).map(p=>`<button class="tape pick ${S.dubbers.includes(p.name)?'sel':''}" style="--c:var(--wax-${p.color})" data-name="${esc(p.name)}" aria-pressed="${S.dubbers.includes(p.name)}">${esc(p.name)}</button>`).join('');
   $('#dubChips').querySelectorAll('button').forEach(b=>b.onclick=()=>{const n=b.dataset.name;S.dubbers=S.dubbers.includes(n)?S.dubbers.filter(x=>x!==n):[...S.dubbers,n];renderDubChips();});
 };
 $('#toWatchBtn').onclick=()=>{
   if(E.mode==='multi'){
     if(!castReady()){toast('حدّد الشخصيات وتوقيت سطورها في غرفة المونتاج أول');return;}
-    const chars=charactersOf(S.current);if(chars.some(c=>!player(E.assign[c.id]))){toast('وزّع كل الشخصيات أول');return;}
+    const chars=charactersOf(S.current).filter(c=>player(E.assign[c.id]));if(!chars.length){toast('اختار لاعب لشخصية واحدة على الأقل');return;}
     const plan=[];for(const c of chars){const n=E.assign[c.id];let p=plan.find(p=>p.name===n);if(!p){p={name:n,characters:[]};plan.push(p);}p.characters.push(c.id);}
     E.session={clip:S.current,plan,index:0,takes:[],duration:0};S.dubbers=[plan[0].name];
   }else if(!S.dubbers.length){toast('اختاروا مين بيدبلج');return;}
+  else if(S.dubbers.length===1&&charactersOf(S.current).length>1){
+    if(!E.soloCharacter){toast('اختار الشخصية اللي بتدبلجها أول');return;}
+    if(!castReady()){toast('حدّد الشخصيات وتوقيت سطورها في غرفة المونتاج أول');return;}
+    E.session={clip:S.current,plan:[{name:S.dubbers[0],characters:[E.soloCharacter]}],index:0,takes:[],duration:0};
+    $('#hearBg').checked=true;
+  }else E.session=null;
   E.casting=false;broadcastCast();watchOriginal();
 };
 const oldWatch=watchOriginal;
@@ -97,7 +119,7 @@ watchOriginal=async function(){await oldWatch();band.assigned=activeCharacters()
 async function acceptEnsembleTake(take){
   const session=E.session;if(!session)return;
   const turn=session.plan[session.index];session.takes.push({...take,characters:turn.characters});session.index++;
-  if(session.index===session.plan.length){S.last=await combineTakes(session);E.session=null;showResult();return;}
+  if(session.index===session.plan.length){toast('نجهّز تسجيلك للتشغيل…');S.last=await combineTakes(session);E.session=null;showResult();return;}
   S.dubbers=[session.plan[session.index].name];await watchOriginal();toast('انحفظ الدور. الحين دور '+S.dubbers[0]);
 }
 record=async function(){
@@ -112,7 +134,7 @@ record=async function(){
   }catch(e){if(e.name!=='AbortError'){toast('تعذّر التسجيل أو تحميل الصوت. جرّب مرة ثانية');controls('c-watch');}}
 };$('#recBtn').onclick=record;
 const oldGoHome=goHome;goHome=function(){E.session=null;E.casting=false;band.assigned=null;broadcastCast();oldGoHome();};
-$('#redoBtn').onclick=()=>{if(S.last.characters){toast('وزّعوا الأدوار من جديد لإعادة الدبلجة الجماعية');goHome();$('#chooseClipBtn').click();}else record();};
+$('#redoBtn').onclick=()=>{if(S.last.characters&&S.last.dubbers.length===1){E.session={clip:S.last.clip,plan:[{name:S.last.dubbers[0],characters:[...S.last.characters]}],index:0,takes:[],duration:0};S.dubbers=[...S.last.dubbers];record();}else if(S.last.characters){toast('وزّعوا الأدوار من جديد لإعادة الدبلجة الجماعية');goHome();$('#chooseClipBtn').click();}else record();};
 
 // Each player has an independent peer identity; only the active take has a deadline.
 function peerFor(name){return E.peers.get(name);}
@@ -211,16 +233,26 @@ $('#clearRemoteTakes').onclick=async()=>{if(!confirm('تمسح التسجيلا�
 // Local editor: character names and explicit per-subtitle assignment.
 $('#lns').insertAdjacentHTML('beforebegin','<div class="cast-panel"><h3>الشخصيات</h3><div id="editCharacters"></div><button class="key flat" id="addCharacter">أضف شخصية</button><p>اختار شخصية كل سطر. التوقيت المتداخل يظهر في مسار إضافي تلقائيًا.</p></div>');
 const oldOpenClip=editClip;
-editClip=async function(c){ed.characters=charactersOf(c).map(c=>({...c}));await oldOpenClip(c);if(ed.characters.length===1)ed.lines.forEach(l=>l.character=ed.characters[0].id);renderCharacters();renderLines();};
+editClip=async function(c){ed.characters=charactersOf(c).map(c=>({...c}));await oldOpenClip(c);if(ed.characters.length===1)ed.lines.forEach(l=>{l.character=ed.characters[0].id;if(l.characters)l.characters=[l.character];});renderCharacters();renderLines();};
 function renderCharacters(){
   $('#editCharacters').innerHTML=ed.characters.map((c,i)=>`<div class="cast-row"><label>شخصية ${i+1} <input class="character-name" data-index="${i}" value="${esc(c.name)}" aria-label="اسم الشخصية ${i+1}"></label><button class="key flat" data-remove="${i}" ${ed.characters.length===1?'disabled':''}>احذف الشخصية</button></div>`).join('');
   $('#editCharacters').querySelectorAll('input').forEach(el=>el.onchange=()=>{const name=el.value.trim();if(!name){el.value=ed.characters[+el.dataset.index].name;return;}ed.characters[+el.dataset.index].name=name;edMark();renderLines();});
-  $('#editCharacters').querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{const c=ed.characters[+b.dataset.remove];if(ed.lines.some(l=>l.character===c.id)){toast('غيّر شخصية السطور المرتبطة فيها أول');return;}ed.characters.splice(+b.dataset.remove,1);edMark();renderCharacters();renderLines();});
+  $('#editCharacters').querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{const c=ed.characters[+b.dataset.remove];if(ed.lines.some(l=>lineCharacters(l).includes(c.id))){toast('غيّر شخصية السطور المرتبطة فيها أول');return;}ed.characters.splice(+b.dataset.remove,1);edMark();renderCharacters();renderLines();});
 }
 $('#addCharacter').onclick=()=>{if(ed.characters.length>=12){toast('الحد ١٢ شخصية');return;}ed.characters.push({id:'c-'+crypto.randomUUID(),name:'شخصية '+(ed.characters.length+1)});edMark();renderCharacters();renderLines();};
 const oldRenderLines=renderLines;
 renderLines=function(){oldRenderLines();if(!ed.characters)return;
-  $('#lns').querySelectorAll('.ln').forEach(row=>{const i=+row.dataset.i,l=ed.lines[i],select=document.createElement('select');select.className='line-character';select.setAttribute('aria-label','شخصية السطر '+(i+1));select.innerHTML='<option value="">اختار الشخصية</option>'+ed.characters.map(c=>`<option value="${esc(c.id)}" ${l.character===c.id?'selected':''}>${esc(c.name)}</option>`).join('');select.onchange=()=>{l.character=select.value;edMark();};row.append(select);});
+  $('#lns').querySelectorAll('.ln').forEach(row=>{
+    const i=+row.dataset.i,l=ed.lines[i],ids=lineCharacters(l);
+    const selects=[0,1].map(slot=>{
+      const select=document.createElement('select');select.className='line-character';
+      select.setAttribute('aria-label',(slot?'الشخصية الثانية للسطر ':'الشخصية الأولى للسطر ')+(i+1));
+      select.innerHTML=`<option value="">${slot?'بدون شخصية ثانية':'اختار الشخصية'}</option>`+ed.characters.map(c=>`<option value="${esc(c.id)}" ${ids[slot]===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+      row.append(select);return select;
+    });
+    const update=()=>selects.forEach((s,k)=>[...s.options].forEach(o=>o.disabled=!!o.value&&o.value===selects[1-k].value));
+    selects.forEach(s=>s.onchange=()=>{l.characters=selects.map(s=>s.value).filter(Boolean);l.character=l.characters[0]||'';update();edMark();});update();
+  });
 };
 $('#seatHearBg').checked=true;
 $('#backHomeBtn').onclick=goHome;

@@ -15,6 +15,16 @@ with tempfile.TemporaryDirectory(prefix='dub-character-test-') as tmp:
         saved=json.loads((folder/'fixture.timing.json').read_text(encoding='utf8'))
         assert saved['characters']==body['characters']
         assert saved['lines']==body['lines']
+        body['lines'][0]['characters']=['a','b']
+        assert serve.save_clip(body)['ok']
+        saved=json.loads((folder/'fixture.timing.json').read_text(encoding='utf8'))
+        assert saved['lines'][0]['characters']==['a','b']
+        body['lines'][0]['characters']=['a','missing']
+        try: serve.save_clip(body)
+        except ValueError: pass
+        else: raise AssertionError('Unknown second role accepted')
+        assert json.loads((folder/'fixture.timing.json').read_text(encoding='utf8'))==saved
+        del body['lines'][0]['characters']
         body['lines'][0]['character']='missing'
         try: serve.save_clip(body)
         except ValueError: pass

@@ -107,6 +107,12 @@ def save_clip(body):
             continue
         num = lambda k: None if ln.get(k) is None else round(float(ln[k]), 3)
         lines.append({"text": text, "start": num("start"), "end": num("end"), "character": str(ln.get("character", ""))})
+        if "characters" in ln:
+            ids = ln["characters"]
+            if not isinstance(ids, list) or len(ids) > 2 or any(not isinstance(c, str) or not c for c in ids) or len(set(ids)) != len(ids):
+                raise ValueError("Choose up to two different characters per line")
+            lines[-1]["characters"] = ids
+            lines[-1]["character"] = ids[0] if ids else ""
 
     characters = body.get("characters", [])
     if not isinstance(characters, list) or not 1 <= len(characters) <= 12:
@@ -117,6 +123,8 @@ def save_clip(body):
     if any(not c["id"] or not c["name"] for c in characters) or len({c["id"] for c in characters}) != len(characters):
         raise ValueError("Invalid character names or IDs")
     if characters and any(l["character"] and l["character"] not in {c["id"] for c in characters} for l in lines):
+        raise ValueError("Unknown subtitle character")
+    if any(cid not in {c["id"] for c in characters} for l in lines for cid in l.get("characters", [])):
         raise ValueError("Unknown subtitle character")
 
     trim = body.get("trim")
@@ -133,11 +141,13 @@ def save_clip(body):
             if not original:
                 prepare.ORIGINALS.mkdir(exist_ok=True)
                 original = prepare.ORIGINALS / clip.name
-                shutil.move(str(clip), str(original))
-            for old in prepare.CLIPS.glob(f"{glob.escape(stem)}.*"):
-                if old.suffix.lower() in prepare.VIDEO_EXT:
-                    old.unlink()
+                shutil.copy2(clip, original)
+            # cut_clip writes a temporary file and replaces the destination only
+            # after success. Keep the playable clip if processing fails.
             prepare.cut_clip(original, prepare.CLIPS / f"{stem}.mp4", trim["in"], trim["out"])
+            for old in prepare.CLIPS.glob(f"{glob.escape(stem)}.*"):
+                if old.suffix.lower() in prepare.VIDEO_EXT and old.suffix.lower() != ".mp4":
+                    old.unlink()
         env = dict(os.environ, PYTHONUTF8="1")
         run = subprocess.run([sys.executable, str(ROOT / "prepare.py")], cwd=ROOT, env=env,
                              capture_output=True, text=True, encoding="utf-8", errors="replace")

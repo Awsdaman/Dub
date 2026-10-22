@@ -34,17 +34,22 @@ function wavBlob(buffer){
   return new Blob([bytes],{type:'audio/wav'});
 }
 async function combineTakes(session){
-  const decoded=await Promise.all(session.takes.map(t=>getBuffer(t.id,t.blob)));
   const rate=ctx.sampleRate,duration=session.duration,mix=ctx.createBuffer(1,Math.ceil(duration*rate),rate),dst=mix.getChannelData(0);
-  session.takes.forEach((take,k)=>{
-    const audio=decoded[k],ranges=assignedIntervals(session.clip,take.characters,duration);
-    for(let i=0;i<dst.length;i++){
-      const t=i/rate;if(!ranges.some(([a,b])=>t>=a&&t<b))continue;
+  for(const take of session.takes){
+    const audio=await getBuffer(take.id,take.blob),ranges=[];
+    for(const [a,b] of assignedIntervals(session.clip,take.characters,duration).sort((a,b)=>a[0]-b[0])){
+      if(ranges.length&&a<=ranges[ranges.length-1][1])ranges[ranges.length-1][1]=Math.max(b,ranges[ranges.length-1][1]);else ranges.push([a,b]);
+    }
+    const channels=Array.from({length:audio.numberOfChannels},(_,c)=>audio.getChannelData(c));
+    for(const [a,b] of ranges)for(let i=Math.max(0,Math.ceil(a*rate));i<Math.min(dst.length,Math.ceil(b*rate));i++){
+      if(i%131072===0)await new Promise(r=>setTimeout(r,0));
+      const t=i/rate;
       const j=Math.floor((t+take.offset)*audio.sampleRate);if(j<0||j>=audio.length)continue;
-      let x=0;for(let c=0;c<audio.numberOfChannels;c++)x+=audio.getChannelData(c)[j];
+      let x=0;for(const channel of channels)x+=channel[j];
       dst[i]+=x/audio.numberOfChannels;
     }
-  });
+    bufCache.delete(take.id);
+  }
   let peak=1;for(const x of dst)peak=Math.max(peak,Math.abs(x));if(peak>1)for(let i=0;i<dst.length;i++)dst[i]/=peak;
   return {id:session.clip.id+'-ensemble-'+Date.now(),clip:session.clip,dubbers:session.plan.map(p=>p.name),characters:session.plan.flatMap(p=>p.characters),blob:wavBlob(mix),offset:0,adjust:0,score:null};
 }
@@ -114,7 +119,7 @@ watchOriginal=async function(){await oldWatch();band.assigned=activeCharacters()
 async function acceptEnsembleTake(take){
   const session=E.session;if(!session)return;
   const turn=session.plan[session.index];session.takes.push({...take,characters:turn.characters});session.index++;
-  if(session.index===session.plan.length){S.last=await combineTakes(session);E.session=null;showResult();return;}
+  if(session.index===session.plan.length){toast('نجهّز تسجيلك للتشغيل…');S.last=await combineTakes(session);E.session=null;showResult();return;}
   S.dubbers=[session.plan[session.index].name];await watchOriginal();toast('انحفظ الدور. الحين دور '+S.dubbers[0]);
 }
 record=async function(){
