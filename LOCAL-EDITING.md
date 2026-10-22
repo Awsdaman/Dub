@@ -42,6 +42,7 @@ git push origin main
 الكليبات القديمة بدون توقيت يدوي تبقى قابلة للعب من جهاز واحد؛ وضع عدة أجهزة يطلب تجهيز الشخصيات والتوقيت أولًا.
 الأدوار المستلمة تبقى في ذاكرة جهاز المضيف حتى تنتهي الجولة. تحديث صفحة المضيف يفقدها.
 
-## Typed times and voice effects
+## كتابة الثواني ومؤثرات الصوت
 
-Each line's start and end, and the scene start and end, can be typed in seconds with two decimals (for example `12.35`). Press Enter or leave the box to apply it. Each line also has a voice-effect menu (echo, cave/hall, giant, cartoon high, robot, radio/phone). The effect is applied to the dubber's voice during that line in playback, the downloaded video and the reels.
+تقدر تكتب بداية ونهاية كل سطر، وبداية ونهاية المشهد، بالثواني مع رقمين بعد الفاصلة (مثال `12.35`). اضغط Enter أو اطلع من الخانة عشان ينطبق.
+كل سطر له قائمة مؤثر صوت: صدى، كهف / قاعة كبيرة، صوت ضخم، صوت رفيع كرتوني، روبوت، راديو / تلفون. المؤثر ينطبق على صوت المدبلج وقت هذا السطر في التشغيل والفيديو المنزّل والعروض.
