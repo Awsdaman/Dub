@@ -531,7 +531,11 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
             <button class="key lit" id="replayDubBtn"><svg class="i"><use href="#i-play"/></svg>عيدها</button>
             <button class="key" id="origBtn"><svg class="i"><use href="#i-film"/></svg>الأصلي</button>
             <button class="key" id="redoBtn"><svg class="i"><use href="#i-rec"/></svg>من جديد</button>
-            <button class="key" id="saveBtn"><svg class="i"><use href="#i-save"/></svg>احفظ</button>
+            <button class="key" id="saveBtn"><svg class="i"><use href="#i-save"/></svg>نزّل الفيديو</button>
+          </div>
+          <div id="downloadPanel" hidden style="text-align:center;margin:1rem 0">
+            <p id="downloadStatus" role="status" aria-live="polite"></p>
+            <a class="key" id="downloadLink" hidden>نزّل الملف الجاهز</a>
           </div>
           <div class="mixer">
             <div class="fader"><input type="range" id="volVoice" min="0" max="2.5" step="0.05" value="1.4" aria-label="صوت المدبلج">الصوت</div>
@@ -1312,31 +1316,35 @@ async function playDub(entry, {exportFile = false} = {}) {
   tracks.push({buf: await recordingGuide(entry.clip,entry.characters||null), gain: bgGain});
   if (token !== playToken) return;
 
-  let rec, chunks = [];
+  let rec, recordingError, chunks = [];
+  try {
   if (exportFile) {
+    if(!v.captureStream&&!v.mozCaptureStream)throw new Error('هذا المتصفح ما يدعم حفظ الفيديو. افتح اللعبة في Brave أو Chrome أو Edge على الكمبيوتر.');
     const vs = v.captureStream ? v.captureStream() : v.mozCaptureStream();
+    if(!vs.getVideoTracks().length)throw new Error('الفيديو مو جاهز للحفظ. شغّل المعاينة ثم جرّب مرة ثانية.');
     const stream = new MediaStream([...vs.getVideoTracks(), ...mixDest.stream.getAudioTracks()]);
     const vm = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find(m => MediaRecorder.isTypeSupported(m));
+    if(!vm)throw new Error('المتصفح ما يدعم صيغة تنزيل الفيديو. جرّب Chrome أو Edge على الكمبيوتر.');
     rec = new MediaRecorder(stream, {mimeType: vm, videoBitsPerSecond: 6e6});
     rec.ondataavailable = e => e.data.size && chunks.push(e.data);
-    await new Promise(r => { rec.onstart = r; rec.start(); });
+    await new Promise((resolve,reject) => { rec.onstart = resolve; rec.onerror=e=>{recordingError=e.error||new Error('تعذّر تجهيز الفيديو');reject(recordingError);flushEnded();};rec.start(1000); });
   }
   const done = ended();
   await playVideoWith(tracks);
   await done;
   if (rec) {
-    await new Promise(r => { rec.onstop = r; rec.stop(); });
-    if (token === playToken) {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob(chunks, {type: 'video/webm'}));
-      a.download = `دوبلاج - ${entry.clip.title} - ${names(entry.dubbers)}.webm`;
-      a.click();
-      setTimeout(()=>URL.revokeObjectURL(a.href),60000);
-      toast('انحفظ الفيديو في التنزيلات');
-    }
+    if(recordingError)throw recordingError;
+    if(rec.state!=='inactive')await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('تأخر تجهيز الملف. جرّب مرة ثانية.')),10000);rec.onstop=()=>{clearTimeout(timer);resolve();};rec.stop();});
+    if(token!==playToken)throw new Error('توقف تجهيز الفيديو قبل ما يخلص. اضغط نزّل الفيديو للمحاولة مرة ثانية.');
+    const blob=new Blob(chunks,{type:rec.mimeType||'video/webm'});
+    if(!blob.size)throw new Error('ما اكتمل ملف الفيديو. جرّب مرة ثانية.');
+    return blob;
   }
+  } finally { if(rec&&rec.state!=='inactive'){try{rec.stop();}catch{}} if(rec)rec.stream.getVideoTracks().forEach(t=>t.stop()); }
 }
 function showResult() {
+  $('#downloadPanel').hidden=true;$('#downloadLink').hidden=true;
+  if(readyDownload){URL.revokeObjectURL(readyDownload);readyDownload=null;}
   controls('c-result');
   syncLabel();
   $('#voteCard').style.display = S.scored ? '' : 'none';
@@ -1355,7 +1363,24 @@ $('#syncEarly').onclick = () => nudge(-40);
 $('#syncLate').onclick = () => nudge(40);
 $('#replayDubBtn').onclick = () => playDub(S.last);
 $('#redoBtn').onclick = () => { stopAll(); bufCache.delete(S.last.id); record().catch(() => {}); };
-$('#saveBtn').onclick = () => { toast('يسجّل الفيديو... خلّه يخلص'); playDub(S.last, {exportFile: true}); };
+let downloadBusy=false,readyDownload=null;
+$('#saveBtn').onclick=async()=>{
+  if(downloadBusy||!S.last)return;
+  downloadBusy=true;const entry=S.last;
+  const buttons=['saveBtn','replayDubBtn','origBtn','redoBtn','syncEarly','syncLate','nextBtn'].map(id=>$('#'+id));
+  buttons.forEach(b=>b.disabled=true);$('#downloadPanel').hidden=false;$('#downloadLink').hidden=true;
+  const status=$('#downloadStatus');status.textContent='نجهّز الفيديو… بيشتغل الكليب كامل قبل التنزيل. خل الصفحة مفتوحة.';
+  let moving=false;const progress=()=>{moving=true;};v.addEventListener('playing',progress);
+  const timer=setInterval(()=>{if(moving)status.textContent='نجهّز الفيديو… '+Math.min(99,Math.floor(v.currentTime/v.duration*100))+'٪ — خلّه يخلص.';},500);
+  try{
+    const blob=await playDub(entry,{exportFile:true});if(!blob)throw new Error('توقف تجهيز الفيديو. جرّب مرة ثانية.');
+    if(readyDownload)URL.revokeObjectURL(readyDownload);
+    readyDownload=URL.createObjectURL(blob);const link=$('#downloadLink');link.href=readyDownload;
+    link.download=`دوبلاج - ${entry.clip.title} - ${names(entry.dubbers)}.webm`;link.hidden=false;
+    status.textContent='الفيديو جاهز. إذا ما بدأ التنزيل، اضغط «نزّل الملف الجاهز». ';link.click();
+  }catch(e){console.error('Video download failed',e);status.textContent='ما اكتمل التنزيل: '+(e.message||'جرّب مرة ثانية.');}
+  finally{clearInterval(timer);v.removeEventListener('playing',progress);downloadBusy=false;buttons.forEach(b=>b.disabled=false);}
+};
 $('#volVoice').oninput = e => voiceGain.gain.value = +e.target.value;
 $('#volBg').oninput = e => bgGain.gain.value = +e.target.value;
 
