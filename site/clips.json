@@ -65,7 +65,7 @@
       ],
       [
         35.36,
-        38.24
+        38.76
       ],
       [
         39.38,
@@ -78,28 +78,28 @@
         "end": 1.32,
         "text": "انا مين؟",
         "character": "c1",
-        "fx": "cave"
+        "fx": "echo"
       },
       {
         "start": 1.67,
         "end": 4.85,
         "text": "انا حارس النفوس الضائعة",
         "character": "c1",
-        "fx": "cave"
+        "fx": "echo"
       },
       {
         "start": 4.89,
         "end": 6.29,
         "text": "انا الفتد",
         "character": "c1",
-        "fx": "cave"
+        "fx": "echo"
       },
       {
         "start": 6.25,
         "end": 7.81,
         "text": "انا الحدر",
         "character": "c1",
-        "fx": "cave"
+        "fx": "echo"
       },
       {
         "start": 7.91,
