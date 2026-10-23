@@ -99,7 +99,7 @@ def save_clip(body):
     if not stem or "/" in stem or "\\" in stem or stem.startswith("."):
         raise ValueError("bad clip id")
     clip = next((p for p in prepare.CLIPS.iterdir() if p.stem == stem and p.suffix.lower() in prepare.VIDEO_EXT), None)
-    original = prepare.original_of(stem)
+    original = prepare.retire_replaced_original(stem, clip, prepare.read_timing(stem))
     if not clip and not original:
         raise ValueError("clip not found")
 

@@ -149,6 +149,25 @@ def original_of(stem: str):
     return next((p for p in ORIGINALS.iterdir() if p.stem == stem and p.suffix.lower() in VIDEO_EXT), None)
 
 
+def retire_replaced_original(stem: str, src, timing):
+    """The kept original of a trimmed clip, unless the clip file was replaced by hand.
+
+    A replaced clip is newer than its kept original and no longer as long as the saved cut.
+    Cutting from the stale original would overwrite the new video, so the original moves
+    to originals/replaced/ and the new file becomes the clip's source."""
+    original = original_of(stem)
+    trim = (timing or {}).get("trim")
+    if not original or not src or not trim or src.stat().st_mtime <= original.stat().st_mtime:
+        return original
+    if abs(duration(src) - (float(trim["out"]) - float(trim["in"]))) <= 0.5:
+        return original
+    aside = ORIGINALS / "replaced"
+    aside.mkdir(exist_ok=True)
+    original.replace(aside / f"{original.stem}.{int(original.stat().st_mtime)}{original.suffix}")
+    print("  ♻️ الفيديو تغيّر: النسخة القديمة انحفظت في originals/replaced")
+    return None
+
+
 def cut_clip(original: Path, dst: Path, t_in: float, t_out: float):
     print(f"  ✂️ قص المشهد {t_in:.1f} → {t_out:.1f}")
     tmp = dst.with_name(dst.stem + ".cutting.mp4")
@@ -197,7 +216,7 @@ def main():
 
         # trimmed in the editing room: the clip file is a cut of the original
         timing = read_timing(stem)
-        original = original_of(stem)
+        original = retire_replaced_original(stem, src, timing)
         trim = (timing or {}).get("trim")
         if trim and original:
             timing_file = CLIPS / f"{stem}.timing.json"
