@@ -70,7 +70,7 @@ $('#dubChips').insertAdjacentHTML('afterend','<div class="cast-panel" id="soloCa
 function renderSoloCasting(){
   const chars=S.current?charactersOf(S.current):[];
   $('#soloCasting').hidden=E.mode!=='shared'||S.dubbers.length!==1||chars.length<2;
-  $('#soloCharacter').innerHTML='<option value="">اختار شخصيتك</option>'+chars.map(c=>`<option value="${esc(c.id)}" ${E.soloCharacter===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+  $('#soloCharacter').innerHTML='<option value="">اختار شخصيتك</option>'+`<option value="*" ${E.soloCharacter==='*'?'selected':''}>كل الشخصيات، أدبلجها كلها لحالي</option>`+chars.map(c=>`<option value="${esc(c.id)}" ${E.soloCharacter===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
 }
 $('#soloCharacter').onchange=e=>{E.soloCharacter=e.target.value;};
 
@@ -108,9 +108,13 @@ $('#toWatchBtn').onclick=()=>{
   }else if(!S.dubbers.length){toast('اختاروا مين بيدبلج');return;}
   else if(S.dubbers.length===1&&charactersOf(S.current).length>1){
     if(!E.soloCharacter){toast('اختار الشخصية اللي بتدبلجها أول');return;}
-    if(!castReady()){toast('حدّد الشخصيات وتوقيت سطورها في غرفة المونتاج أول');return;}
-    E.session={clip:S.current,plan:[{name:S.dubbers[0],characters:[E.soloCharacter]}],index:0,takes:[],duration:0};
-    $('#hearBg').checked=true;
+    // every part: one take over the whole clip, the same as a one-character clip
+    if(E.soloCharacter==='*')E.session=null;
+    else{
+      if(!castReady()){toast('حدّد الشخصيات وتوقيت سطورها في غرفة المونتاج أول');return;}
+      E.session={clip:S.current,plan:[{name:S.dubbers[0],characters:[E.soloCharacter]}],index:0,takes:[],duration:0};
+      $('#hearBg').checked=true;
+    }
   }else E.session=null;
   E.casting=false;broadcastCast();watchOriginal();
 };

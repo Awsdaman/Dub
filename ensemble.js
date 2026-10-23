@@ -70,7 +70,7 @@ $('#dubChips').insertAdjacentHTML('afterend','<div class="cast-panel" id="soloCa
 function renderSoloCasting(){
   const chars=S.current?charactersOf(S.current):[];
   $('#soloCasting').hidden=E.mode!=='shared'||S.dubbers.length!==1||chars.length<2;
-  $('#soloCharacter').innerHTML='<option value="">اختار شخصيتك</option>'+chars.map(c=>`<option value="${esc(c.id)}" ${E.soloCharacter===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+  $('#soloCharacter').innerHTML='<option value="">اختار شخصيتك</option>'+`<option value="*" ${E.soloCharacter==='*'?'selected':''}>كل الشخصيات، أدبلجها كلها لحالي</option>`+chars.map(c=>`<option value="${esc(c.id)}" ${E.soloCharacter===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
 }
 $('#soloCharacter').onchange=e=>{E.soloCharacter=e.target.value;};
 
@@ -108,9 +108,13 @@ $('#toWatchBtn').onclick=()=>{
   }else if(!S.dubbers.length){toast('اختاروا مين بيدبلج');return;}
   else if(S.dubbers.length===1&&charactersOf(S.current).length>1){
     if(!E.soloCharacter){toast('اختار الشخصية اللي بتدبلجها أول');return;}
-    if(!castReady()){toast('حدّد الشخصيات وتوقيت سطورها في غرفة المونتاج أول');return;}
-    E.session={clip:S.current,plan:[{name:S.dubbers[0],characters:[E.soloCharacter]}],index:0,takes:[],duration:0};
-    $('#hearBg').checked=true;
+    // every part: one take over the whole clip, the same as a one-character clip
+    if(E.soloCharacter==='*')E.session=null;
+    else{
+      if(!castReady()){toast('حدّد الشخصيات وتوقيت سطورها في غرفة المونتاج أول');return;}
+      E.session={clip:S.current,plan:[{name:S.dubbers[0],characters:[E.soloCharacter]}],index:0,takes:[],duration:0};
+      $('#hearBg').checked=true;
+    }
   }else E.session=null;
   E.casting=false;broadcastCast();watchOriginal();
 };
@@ -124,6 +128,31 @@ async function acceptEnsembleTake(take){
   if(session.index===session.plan.length){await finishEnsemble();return;}
   S.dubbers=[session.plan[session.index].name];await watchOriginal();toast('انحفظ الدور. الحين دور '+S.dubbers[0]);
 }
+// Several players on one device: each one listens to their take and can fix it before passing on.
+function showReview(entry){
+  const session=E.session;if(!session)return;
+  session.review=entry;
+  const next=session.plan[session.index+1];
+  controls('c-review');setWho(entry.dubbers);band.assigned=entry.characters;band.clock=()=>v.currentTime;
+  $('#reviewWho').textContent=`اسمع دورك يا ${entry.dubbers[0]}. إذا فيه جزء تبي تعيده، اسحب الشريط له واضغط سجّل من هنا`;
+  $('#reviewNext span').textContent=next?'تمام، دور '+next.name:'تمام، اجمع الأصوات';
+  if(typeof saveRecovery==='function')void saveRecovery();
+  playDub(entry).catch(()=>{});
+}
+async function reviewCapture(fromHere){
+  const session=E.session,entry=session?.review;if(!entry||captureBusy)return;
+  const at=v.currentTime;tape.keep=true;
+  try{
+    const take=await captureTake(entry.clip,{hearBg:$('#hearBg').checked,characters:entry.characters,...(fromHere?{base:basePass(entry),from:at}:{})});
+    bufCache.delete(entry.id);if(E.session!==session)return;
+    showReview({...entry,id:entry.clip.id+'-'+Date.now(),...take});
+  }catch(e){if(E.session!==session)return;if(e.name!=='AbortError')toast('ما ضبط التسجيل. رجعنا لتسجيلك السابق');showReview(entry);}
+  finally{tape.keep=false;}
+}
+$('#reviewListen').onclick=()=>{if(E.session?.review)playDub(E.session.review).catch(()=>{});};
+$('#reviewPunch').onclick=()=>reviewCapture(true);
+$('#reviewRedo').onclick=()=>reviewCapture(false);
+$('#reviewNext').onclick=async()=>{const entry=E.session?.review;if(!entry)return;stopAll();delete E.session.review;await acceptEnsembleTake(entry);};
 async function finishEnsemble(){
   if(E.mixing)return;
   const session=E.session;if(!session||session.index<session.plan.length)return;
@@ -141,7 +170,7 @@ record=async function(){
   sendHostPhase('recording');
   try{const take=await captureTake(S.current,{hearBg:$('#hearBg').checked});
     const entry={id:S.current.id+'-'+Date.now(),clip:S.current,dubbers:[...S.dubbers],...take,adjust:0,score:null};
-    if(E.session)await acceptEnsembleTake(entry);else{S.last=entry;showResult();}
+    if(E.session)await(E.session.plan.length>1?showReview({...entry,characters:E.session.plan[E.session.index].characters}):acceptEnsembleTake(entry));else{S.last=entry;showResult();}
   }catch(e){if(e.name!=='AbortError'){toast('تعذّر التسجيل أو تحميل الصوت. جرّب مرة ثانية');controls('c-watch');}}
 };$('#recBtn').onclick=record;
 const oldGoHome=goHome;goHome=function(){E.session=null;E.casting=false;band.assigned=null;broadcastCast();oldGoHome();};
