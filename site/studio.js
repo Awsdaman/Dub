@@ -120,7 +120,17 @@ renderLines = function() {
 // Shown to the room only. It never touches the votes.
 // a badge on the picture, where the room is already looking
 document.querySelector('#monitor .scr').insertAdjacentHTML('beforeend',
-  '<div class="timing" id="timingWrap" hidden>دقة التوقيت <span class="counter" id="timingPct"></span><span id="timingNote" style="font-weight:500"></span></div>');
+  `<div class="timing" id="timingWrap" hidden>
+    <span>نسبة دقتك في الدبلجة كانت <bdi dir="ltr"><span class="counter" id="timingPct"></span>%</bdi></span>
+    <span id="timingNote" class="note"></span>
+    <button class="why" id="timingWhy" aria-expanded="false" aria-controls="timingInfo" aria-label="وش معنى النسبة؟">!</button>
+  </div>`);
+// the explanation sits just under the picture, which clips anything inside it
+$('#monitor').insertAdjacentHTML('beforeend',
+  `<p class="timing-info" id="timingInfo" hidden>النسبة تقيس قد إيش صوتك جا داخل المربعات الصفراء على شريط النص، وهي الأوقات اللي تتكلم فيها الشخصية في الكليب الأصلي، وقد إيش عبّيتها بصوتك. الكلام برا الأصفر أو السكوت داخله ينزّلها. ١٠٠٪ يعني توقيتك مطابق للأصلي. هالنسبة للفلة بس وما تدخل في التصويت.</p>`);
+const timingInfo = open => { $('#timingInfo').hidden = !open; $('#timingWhy').setAttribute('aria-expanded', open); };
+$('#timingWhy').onclick = () => timingInfo($('#timingInfo').hidden);
+document.addEventListener('pointerdown', e => { if (!e.target.closest('#timingWrap, #timingInfo')) timingInfo(false); });
 async function timingScore(entry) {
   const dur = v.duration;
   const blocks = entry.characters ? assignedIntervals(entry.clip, entry.characters, dur)
@@ -152,7 +162,7 @@ async function timingScore(entry) {
 }
 // the badge belongs to the result only
 const beforeTimingControls = controls;
-controls = function(id) { if (id !== 'c-result') $('#timingWrap').hidden = true; return beforeTimingControls.apply(this, arguments); };
+controls = function(id) { if (id !== 'c-result') { $('#timingWrap').hidden = true; timingInfo(false); } return beforeTimingControls.apply(this, arguments); };
 const beforeTimingResult = showResult;
 showResult = function() {
   $('#timingWrap').hidden = true;
@@ -160,8 +170,8 @@ showResult = function() {
   if (entry) timingScore(entry).then(score => {
     if (S.last !== entry || score == null) return;
     const el = $('#timingPct'); delete el.dataset.v; el.innerHTML = '';
-    counter(el, pad2(Math.min(99, score)));
-    $('#timingNote').textContent = score >= 85 ? ' مضبوط على الشعرة' : score >= 65 ? ' قريب' : ' الصوت طالع برا الأصفر';
+    counter(el, String(Math.min(100, score)));
+    $('#timingNote').textContent = score >= 85 ? 'مضبوط على الشعرة' : score >= 65 ? 'قريب' : 'الصوت طالع برا الأصفر';
     $('#timingWrap').hidden = false;
   }).catch(e => console.warn('Timing meter unavailable', e));
   return r;
