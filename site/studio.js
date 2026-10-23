@@ -3,7 +3,7 @@
 /* ================= voice effects ================= */
 // Set per line in the editing room so the dub matches the original (Mushu's echo, a giant's voice...).
 const FX = {
-  echo: {name: 'صدى', tail: 1.6},
+  echo: {name: 'صدى', tail: 1.2},
   cave: {name: 'كهف / قاعة كبيرة', tail: 2.4},
   deep: {name: 'صوت ضخم', tail: .9},
   high: {name: 'صوت رفيع كرتوني', tail: 0},
@@ -50,7 +50,7 @@ const fxProcess = {
   high: (x, rate) => shiftPitch(x, rate, 1.45),
   echo: (x, rate) => offline(x, rate, FX.echo.tail, (oc, src) => {
     const delay = oc.createDelay(1); delay.delayTime.value = .24;
-    const feedback = gainOf(oc, .42), wet = gainOf(oc, .65);
+    const feedback = gainOf(oc, .3), wet = gainOf(oc, .4);
     src.connect(oc.destination); src.connect(delay); delay.connect(feedback).connect(delay); delay.connect(wet).connect(oc.destination);
   }),
   cave: (x, rate) => offline(x, rate, FX.cave.tail, (oc, src) => {
