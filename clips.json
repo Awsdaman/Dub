@@ -81,28 +81,28 @@
     "end": 1.32,
     "text": "انا مين؟",
     "character": "c1",
-    "fx": "deep"
+    "fx": "cave"
    },
    {
     "start": 1.67,
     "end": 4.85,
     "text": "انا حارس النفوس الضائعة",
     "character": "c1",
-    "fx": "deep"
+    "fx": "cave"
    },
    {
     "start": 4.89,
     "end": 6.29,
     "text": "انا الفتد",
     "character": "c1",
-    "fx": "deep"
+    "fx": "cave"
    },
    {
     "start": 6.25,
     "end": 7.81,
     "text": "انا الحدر",
     "character": "c1",
-    "fx": "deep"
+    "fx": "cave"
    },
    {
     "start": 7.91,
@@ -183,28 +183,28 @@
      "start": 57.286,
      "end": 58.59,
      "character": "c1",
-     "fx": "deep"
+     "fx": "cave"
     },
     {
      "text": "انا حارس النفوس الضائعة",
      "start": 58.942,
      "end": 62.12,
      "character": "c1",
-     "fx": "deep"
+     "fx": "cave"
     },
     {
      "text": "انا الفتد",
      "start": 62.163,
      "end": 63.559,
      "character": "c1",
-     "fx": "deep"
+     "fx": "cave"
     },
     {
      "text": "انا الحدر",
      "start": 63.518,
      "end": 65.084,
      "character": "c1",
-     "fx": "deep"
+     "fx": "cave"
     },
     {
      "text": "الملحلح موشو",
