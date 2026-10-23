@@ -5,6 +5,7 @@ import json
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import threading
@@ -163,9 +164,26 @@ def save_clip(body):
     return {"ok": True}
 
 
+class Server(http.server.ThreadingHTTPServer):
+    # One game server per port. Windows otherwise lets a second copy share the port, and
+    # requests then land on whichever copy it picks, possibly one still running old code.
+    allow_reuse_address = False
+
+    def server_bind(self):
+        if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
+
+
 if __name__ == "__main__":
     url = f"http://localhost:{PORT}/"
-    server = http.server.ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
+    try:
+        server = Server(("127.0.0.1", PORT), Handler)
+    except OSError:
+        print(f"The game is already running at {url}. Close its window first to restart it.")
+        if "--no-browser" not in sys.argv:
+            webbrowser.open(url)
+        sys.exit(0)
     print(f"Game running at {url}  (close this window to stop)")
     if "--no-browser" not in sys.argv:
         webbrowser.open(url)
