@@ -20,7 +20,7 @@ const beforeRecoverySave=save;save=function(){beforeRecoverySave();void saveReco
 const beforeRecoveryResult=showResult;showResult=function(){void saveRecovery();return beforeRecoveryResult();};
 $('#startBtn').insertAdjacentHTML('afterend','<div id="recoveryNotice" hidden><p>فيه تسجيلات محفوظة على هذا الجهاز.</p><button class="key" id="restoreRecordings">استرجع التسجيلات</button></div>');
 const recoveryReady=recoveryTransaction('readonly').then(data=>{
- if(data?.version===1&&(data.dubs?.length||data.last||data.session?.takes?.length||data.seat)){recoveryPending=data;$('#recoveryNotice').hidden=false;}
+ if(data?.version===1&&(data.dubs?.length||data.last||data.session?.takes?.length||data.session?.review||data.seat)){recoveryPending=data;$('#recoveryNotice').hidden=false;}
 }).catch(e=>console.warn('Recovery unavailable',e));
 const beforeRecoveryStart=$('#startBtn').onclick;
 $('#startBtn').onclick=async()=>{
@@ -41,6 +41,8 @@ $('#restoreRecordings').onclick=async()=>{
      const turn=E.session.plan[E.session.index];S.dubbers=[turn.name];
      // Remote players need to join a newly opened room after a host refresh.
      if(player(turn.name)?.remote){show('s-setup');toast('رجعت التسجيلات. افتح غرفة جديدة وخَل اللاعبين يرجعون، ثم اضغط كمّل الأدوار.');$('#resumeRecovered').hidden=false;}
+     // a take that was waiting for its player's review goes back to the review
+     else if(E.session.review){await enterBooth(S.current);showReview(E.session.review);}
      else await watchOriginal();
    }
  }else if(S.last){S.current=S.last.clip;await enterBooth(S.current);showResult();}

@@ -554,6 +554,17 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
           </div>
         </div>
 
+        <!-- review: several players on one device check their own take before the next one -->
+        <div class="console" id="c-review">
+          <p class="hint" id="reviewWho"></p>
+          <div class="keys tight">
+            <button class="key" id="reviewListen"><svg class="i"><use href="#i-play"/></svg>اسمع تسجيلك</button>
+            <button class="key" id="reviewPunch"><svg class="i"><use href="#i-rec"/></svg>سجّل من هنا</button>
+            <button class="key" id="reviewRedo"><svg class="i"><use href="#i-rec"/></svg>من جديد</button>
+          </div>
+          <div class="keys"><button class="key big go" id="reviewNext"><svg class="i"><use href="#i-check"/></svg><span></span></button></div>
+        </div>
+
         <!-- result -->
         <div class="console" id="c-result">
           <div class="keys tight">
@@ -759,7 +770,7 @@ function show(id) {
 let shownControls = null;
 function controls(id) {
   shownControls = id;
-  ['c-watch', 'c-record', 'c-result', 'c-reel', 'c-remote', 'c-seat'].forEach(c => $('#' + c).style.display = c === id ? 'flex' : 'none');
+  ['c-watch', 'c-record', 'c-review', 'c-result', 'c-reel', 'c-remote', 'c-seat'].forEach(c => $('#' + c).style.display = c === id ? 'flex' : 'none');
   $('#vuSide').style.display = id === 'c-record' || id === 'c-watch' ? 'block' : 'none';
 }
 let toastT;
@@ -1106,6 +1117,7 @@ function scrubMode() {
   if (captureBusy) return tape.menu ? 'tape' : null;
   if (downloadBusy || !$('#s-play').classList.contains('on')) return null;
   if (shownControls === 'c-result' && S.last) return 'result';
+  if (shownControls === 'c-review' && E.session?.review) return 'review';
   if (shownControls === 'c-seat') return RS.take && !$('#seatPreview').hidden ? 'seat' : 'watch';
   if (shownControls === 'c-watch') return 'watch';
   return null;
@@ -1133,14 +1145,14 @@ function endBandDrag() {
   const play = d.moved ? (d.mode !== 'watch' || d.wasPlaying) : !d.wasPlaying;
   if (!play) return;
   if (d.mode === 'watch') v.play().catch(() => {});
-  else playDub(d.mode === 'seat' ? RS.take : S.last, {from: v.currentTime}).catch(() => {});
+  else playDub({seat: RS.take, review: E.session?.review}[d.mode] || S.last, {from: v.currentTime}).catch(() => {});
 }
 bandCanvas.addEventListener('pointerup', endBandDrag);
 bandCanvas.addEventListener('pointercancel', endBandDrag);
 (function bandLoop() {
   if ($('#s-play').classList.contains('on')) {
     const mode = scrubMode();
-    bandCanvas.classList.toggle('scrub', !!mode); $('#bandHint').hidden = mode !== 'result' && mode !== 'seat';
+    bandCanvas.classList.toggle('scrub', !!mode); $('#bandHint').hidden = !['result', 'seat', 'review'].includes(mode);
     drawBand(bandCanvas, band);
   }
   if ($('#s-edit').classList.contains('on')) drawBand($('#eband'), ed.band);
