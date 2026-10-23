@@ -112,8 +112,9 @@ renderLines = function() {
 
 /* ================= timing meter ================= */
 // Shown to the room only. It never touches the votes.
-document.querySelector('#c-result .mixer').insertAdjacentHTML('beforebegin',
-  '<div class="verdict" id="timingWrap" hidden>دقة التوقيت <span class="counter" id="timingPct"></span><span id="timingNote" style="font-size:.9rem;font-weight:500"></span></div>');
+// a badge on the picture, where the room is already looking
+document.querySelector('#monitor .scr').insertAdjacentHTML('beforeend',
+  '<div class="timing" id="timingWrap" hidden>دقة التوقيت <span class="counter" id="timingPct"></span><span id="timingNote" style="font-weight:500"></span></div>');
 async function timingScore(entry) {
   const dur = v.duration;
   const blocks = entry.characters ? assignedIntervals(entry.clip, entry.characters, dur)
@@ -128,8 +129,9 @@ async function timingScore(entry) {
     db[k] = cnt ? 10 * Math.log10(sum / cnt + 1e-10) : -100;
   }
   const sorted = [...db].sort((a, b) => a - b), floor = sorted[Math.floor(n * .2)], peak = sorted[Math.floor(n * .98)];
-  if (peak - floor < 12) return 0;  // nothing louder than the room
-  const thr = Math.max(floor + 10, peak - 30);
+  if (peak < -55) return 0;  // silence
+  // someone talking through most of the clip leaves no quiet part to measure the room from
+  const thr = peak - floor < 12 ? Math.max(-55, peak - 20) : Math.max(floor + 10, peak - 30);
   const inside = (t, pad) => blocks.some(([a, b]) => t >= a - pad && t <= b + pad);
   let talk = 0, talkIn = 0, block = 0, blockTalk = 0;
   for (let k = 0; k < n; k++) {
@@ -142,6 +144,9 @@ async function timingScore(entry) {
   const P = talkIn / talk, R = Math.min(1, blockTalk / block / .7);
   return Math.round(100 * 2 * P * R / (P + R || 1));
 }
+// the badge belongs to the result only
+const beforeTimingControls = controls;
+controls = function(id) { if (id !== 'c-result') $('#timingWrap').hidden = true; return beforeTimingControls.apply(this, arguments); };
 const beforeTimingResult = showResult;
 showResult = function() {
   $('#timingWrap').hidden = true;
@@ -168,6 +173,11 @@ $('#reelBtn').insertAdjacentHTML('afterend', '<button class="key" id="bloopersBt
 const beforeBloopersFinal = goFinal;
 goFinal = function() {
   beforeBloopersFinal.apply(this, arguments);
+  // mark head-to-head takes in the list of the night's takes
+  $('#dubList').querySelectorAll('.t').forEach(row => {
+    const d = S.dubs[+row.querySelector('button[data-i]')?.dataset.i];
+    if (d?.duel) row.querySelector('.b small').textContent += d.duelWin ? ` · فاز بالتحدي +${DUEL_BONUS}` : ' · تحدي';
+  });
   $('#bloopersBtn').hidden = !S.bloopers.length;
   $('#bloopersBtn span').textContent = `أخطاء الكواليس (${S.bloopers.length})`;
 };

@@ -222,6 +222,11 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
 .bandwrap{position:relative;margin:.9rem calc(-1 * clamp(16px,2.2vw,40px)) 0}
 #band{display:block;width:100%;height:clamp(7rem,14.5vh,11rem)}
 #band.scrub{cursor:grab;touch-action:none}
+.bandhint{position:absolute;top:.35rem;inset-inline-start:clamp(16px,2.2vw,40px);font-size:.8rem;font-weight:700;color:#5d5546;background:rgba(236,232,220,.92);padding:0 .5rem;border-radius:.3rem;pointer-events:none}
+#c-result .keys.tight{gap:.5rem}
+#c-result .keys.tight .key{min-width:5rem;padding:.7rem .6rem .6rem}
+.monitor .timing{position:absolute;bottom:.8rem;left:.8rem;direction:rtl;display:flex;align-items:center;gap:.5rem;background:rgba(0,0,0,.78);color:#fff;font-weight:700;font-size:1rem;padding:.25rem .7rem;border-radius:.3rem}
+.monitor .timing .counter{font-size:1.3rem;color:var(--wax-0)}
 #band.scrub:active{cursor:grabbing}
 .bandcap{position:absolute;bottom:.4rem;inset-inline-start:clamp(16px,2.2vw,40px);font-size:.75rem;color:#6e6656;font-weight:500;pointer-events:none}
 
@@ -552,7 +557,6 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
             <button class="key" id="redoBtn"><svg class="i"><use href="#i-rec"/></svg>من جديد</button>
             <button class="key" id="saveBtn"><svg class="i"><use href="#i-save"/></svg>نزّل الفيديو</button>
           </div>
-          <p class="hint" id="scrubHint">اسحب شريط النص تحت عشان تسمع أي جزء</p>
           <div id="downloadPanel" hidden style="text-align:center;margin:1rem 0">
             <p id="downloadStatus" role="status" aria-live="polite"></p>
             <a class="key" id="downloadLink" hidden>نزّل الملف الجاهز</a>
@@ -586,7 +590,7 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
           <p id="seatTakeStatus" role="status" aria-live="polite"></p><progress id="seatUpload" aria-label="يرفع التسجيل" hidden></progress>
           <div class="keys"><button class="key" id="seatWatch">شوف الأصلي</button><button class="key big rec" id="seatRecord">سجّل</button></div>
           <label class="hint"><input type="checkbox" id="seatHearBg"> اسمع الموسيقى بالسماعة وقت التسجيل</label>
-          <div id="seatPreview" hidden><button class="key" id="seatReplay">اسمع دبلجتك</button><button class="key" id="seatPunch">سجّل من هنا</button><button class="key big go" id="seatSend">أرسلها</button><p class="hint">اسحب شريط النص تحت عشان تسمع أي جزء</p></div>
+          <div id="seatPreview" hidden><button class="key" id="seatReplay">اسمع دبلجتك</button><button class="key" id="seatPunch">سجّل من هنا</button><button class="key big go" id="seatSend">أرسلها</button></div>
           <button class="key flat" id="seatCancel">ألغِ الدور</button>
         </div>
         <!-- reel -->
@@ -595,7 +599,7 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
         </div>
       </div>
     </div>
-    <div class="bandwrap"><canvas id="band"></canvas><div class="bandcap" id="bandcap"></div></div>
+    <div class="bandwrap"><canvas id="band"></canvas><div class="bandcap" id="bandcap"></div><div class="bandhint" id="bandHint" hidden>اسحب الشريط يمين ويسار عشان تسمع أي جزء</div></div>
   </div>
 </section>
 
@@ -1128,7 +1132,11 @@ function endBandDrag() {
 bandCanvas.addEventListener('pointerup', endBandDrag);
 bandCanvas.addEventListener('pointercancel', endBandDrag);
 (function bandLoop() {
-  if ($('#s-play').classList.contains('on')) { bandCanvas.classList.toggle('scrub', !!scrubMode()); drawBand(bandCanvas, band); }
+  if ($('#s-play').classList.contains('on')) {
+    const mode = scrubMode();
+    bandCanvas.classList.toggle('scrub', !!mode); $('#bandHint').hidden = mode !== 'result' && mode !== 'seat';
+    drawBand(bandCanvas, band);
+  }
   if ($('#s-edit').classList.contains('on')) drawBand($('#eband'), ed.band);
   requestAnimationFrame(bandLoop);
 })();
@@ -1352,6 +1360,8 @@ async function renderTape(segs, duration, mask = null) {
 }
 function recPanel(paused) {
   $('#recLive').hidden = paused; $('#recLiveHint').hidden = paused; $('#recPaused').hidden = !paused;
+  // nothing to meter while stopped; on phones this keeps the band on screen
+  if (shownControls === 'c-record') $('#vuSide').style.display = paused ? 'none' : 'block';
 }
 async function captureTake(clip, {hearBg = false, status = () => {}, base = null, from = 0, characters = activeCharacters(), mask = null} = {}) {
   if (captureBusy) throw new Error('التسجيل شغال');
