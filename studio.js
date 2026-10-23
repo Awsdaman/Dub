@@ -5,7 +5,7 @@
 const FX = {
   echo: {name: 'صدى', tail: 1.6},
   cave: {name: 'كهف / قاعة كبيرة', tail: 2.4},
-  deep: {name: 'صوت ضخم', tail: 0},
+  deep: {name: 'صوت ضخم', tail: .9},
   high: {name: 'صوت رفيع كرتوني', tail: 0},
   robot: {name: 'روبوت', tail: 0},
   radio: {name: 'راديو / تلفون', tail: 0},
@@ -40,7 +40,13 @@ function impulse(oc, seconds) {
 const wire = (oc, ...nodes) => { for (let i = 0; i < nodes.length - 1; i++) nodes[i].connect(nodes[i + 1]); nodes.at(-1).connect(oc.destination); };
 const gainOf = (oc, value) => { const g = oc.createGain(); g.gain.value = value; return g; };
 const fxProcess = {
-  deep: (x, rate) => shiftPitch(x, rate, .72),
+  // a heavy voice that is still the dubber's: a little lower, more chest, a hint of size
+  deep: (x, rate) => offline(shiftPitch(x, rate, .84), rate, FX.deep.tail, (oc, src) => {
+    const chest = oc.createBiquadFilter(), verb = oc.createConvolver();
+    chest.type = 'lowshelf'; chest.frequency.value = 220; chest.gain.value = 6;
+    verb.buffer = impulse(oc, .9);
+    wire(oc, src, chest, gainOf(oc, .85)); wire(oc, src, verb, gainOf(oc, .16));
+  }),
   high: (x, rate) => shiftPitch(x, rate, 1.45),
   echo: (x, rate) => offline(x, rate, FX.echo.tail, (oc, src) => {
     const delay = oc.createDelay(1); delay.delayTime.value = .24;
