@@ -338,3 +338,79 @@ $('#resetPoints').onclick = () => {
   save(); renderBoard(); sendHostPhase('home');
   toast('صفّرنا النقاط');
 };
+
+/* ================= going back ================= */
+// From watching, reviewing or a finished take, back to choosing characters and players for the
+// same clip. The choices made so far stay selected, so only what needs changing is changed.
+function backToCasting(loses) {
+  if (loses && !confirm('التسجيل اللي ما انحفظ بيروح. ترجعون لاختيار الأدوار؟')) return;
+  recCancelled = true; stopAll(); lamp(''); $('#slate').classList.remove('on');
+  if (RS.pending) { fire('turn_cancelled', {takeId: RS.pending.takeId, to: RS.pending.peer}); clearPending(); }
+  if (RS.vote) { fire('vote_closed', {takeId: RS.vote.takeId, avg: null}); RS.vote = null; }
+  E.session = null; D = null; S.last = null; band.assigned = null;
+  show('s-spin'); $('#film').hidden = true; $('#pickArea').classList.add('on');
+  E.casting = true; renderDubChips(); renderCasting(); broadcastCast();
+  if (typeof saveRecovery === 'function') void saveRecovery();
+}
+$('#castBackBtn').onclick = () => goHome();
+$('#watchBackBtn').onclick = () => backToCasting(!!(E.session?.takes.length || D?.results.length));
+$('#reviewBackBtn').onclick = () => backToCasting(true);
+$('#resultBackBtn').onclick = () => backToCasting(true);
+
+/* ================= watching the original together ================= */
+// When the host plays the original, every connected device loads the same clip and all of them
+// start together. The host waits for the devices (or presses شغّلوا الحين for a slow one).
+let watchSync = null;
+async function watchTogether(clip) {
+  if (RS.role !== 'host') return true;
+  const seats = [...E.peers.values()].filter(id => remote.online(id));
+  if (!seats.length) return true;
+  const token = playToken, sync = watchSync = {clipId: clip.id, ready: new Set(), now: false};
+  fire('watch_prepare', {clipId: clip.id});
+  $('#syncWait').hidden = false;
+  const started = performance.now();
+  while (seats.some(id => !sync.ready.has(id)) && !sync.now && performance.now() - started < 60000) {
+    if (token !== playToken || watchSync !== sync) { $('#syncWait').hidden = true; return false; }
+    $('#syncWait span').textContent = `ننتظر أجهزة الشباب يحمّلون الكليب… ${sync.ready.size} من ${seats.length}`;
+    await sleep(150);
+  }
+  $('#syncWait').hidden = true;
+  if (token !== playToken || watchSync !== sync) return false;
+  fire('watch_play', {clipId: clip.id});
+  return true;
+}
+$('#syncNow').onclick = () => { if (watchSync) watchSync.now = true; };
+remote.on('watch_ready', p => { if (RS.role === 'host' && watchSync?.clipId === p.clipId) watchSync.ready.add(p.sender); });
+const beforeSyncControls = controls;
+controls = function(id) { if (id !== 'c-watch') { watchSync = null; $('#syncWait').hidden = true; } return beforeSyncControls.apply(this, arguments); };
+
+// on a remote player's device
+let seatWatch = null;
+function stopSeatWatch() {
+  if (!seatWatch) return;
+  seatWatch = null; stopAll();
+  if (!RS.turn) seatWaiting();
+}
+remote.on('watch_prepare', async p => {
+  if (RS.role !== 'seat' || !RS.accepted || p.sender !== RS.host || RS.turn || captureBusy) return;
+  const clip = S.clips.find(c => c.id === p.clipId);
+  if (!clip) return;
+  const watch = seatWatch = {clipId: clip.id, playAt: null};
+  stopAll(); S.current = clip;
+  if (!await enterBooth(clip) || seatWatch !== watch) return;
+  controls('none'); setWho([]); v.muted = false; await seekZero();
+  if (seatWatch !== watch) return;
+  watch.ready = true;
+  fire('watch_ready', {clipId: clip.id, to: RS.host});
+  // a device that finished downloading after the others started joins at their position
+  if (watch.playAt != null) { await seekTo(Math.min(v.duration - .1, (performance.now() - watch.playAt) / 1000)); v.play().catch(() => {}); }
+});
+remote.on('watch_play', p => {
+  if (RS.role !== 'seat' || p.sender !== RS.host || seatWatch?.clipId !== p.clipId) return;
+  seatWatch.playAt = performance.now();
+  if (seatWatch.ready) v.play().catch(() => {});
+});
+// the host moved on from watching: back to the waiting screen (a player whose turn it is goes to their booth)
+remote.on('state', p => { if (RS.role === 'seat' && p.sender === RS.host && p.phase !== 'watch') stopSeatWatch(); });
+remote.on('your_turn', () => { seatWatch = null; });
+v.addEventListener('ended', () => { if (RS.role === 'seat' && seatWatch) stopSeatWatch(); });

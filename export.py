@@ -68,16 +68,21 @@ def export():
         target = SITE / 'clips' / (c['id'] + '.mp4')
         print(f"Encoding {c['title']}...", flush=True)
         subprocess.run([ffmpeg, '-v', 'error', '-y', '-i', str(source(c['video'])),
-                        '-map', '0:v:0', '-map', '0:a:0?', '-vf', "scale=w='min(1280,iw)':h=-2",
-                        '-c:v', 'libx264', '-crf', '26', '-preset', 'medium', '-pix_fmt', 'yuv420p',
-                        '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', str(target)], check=True)
+                        # each clip is downloaded completely before it plays, so smaller files start sooner;
+                        # 960px looks the same as 1280px for these upscaled cartoons, at about 40% less data
+                        '-map', '0:v:0', '-map', '0:a:0?', '-vf', "scale=w='min(960,iw)':h=-2",
+                        '-c:v', 'libx264', '-crf', '27', '-preset', 'slow', '-pix_fmt', 'yuv420p',
+                        '-c:a', 'aac', '-b:a', '96k', '-movflags', '+faststart', str(target)], check=True)
         out = {k: c[k] for k in ('id', 'title', 'voices', 'characters', 'lines', 'speech', 'timed') if k in c}
         out['video'] = target.relative_to(SITE).as_posix()
         for k, suffix in [('bg', '.bg.mp3'), ('thumb', '.jpg')]:
             out[k] = None
             if c.get(k):
                 dst = SITE / 'processed' / (c['id'] + suffix)
-                shutil.copy2(source(c[k]), dst)
+                if k == 'bg':  # 112 kbps is plenty for background music; decodes with the same alignment
+                    subprocess.run([ffmpeg, '-v', 'error', '-y', '-i', str(source(c[k])), '-b:a', '112k', str(dst)], check=True)
+                else:
+                    shutil.copy2(source(c[k]), dst)
                 out[k] = dst.relative_to(SITE).as_posix()
         exported.append(out)
     (SITE / 'clips.json').write_text(json.dumps(exported, ensure_ascii=False, indent=2), encoding='utf-8')

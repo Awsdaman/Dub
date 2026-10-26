@@ -11,7 +11,7 @@ function assignedIntervals(clip,ids,duration){
 }
 async function recordingGuide(clip,ids){
   initAudio();
-  const original=await getBuffer('original:'+clip.video,url(clip.video));
+  const original=await getBuffer('original:'+clip.video,await clipFile(clip).blob);
   const music=clip.bg?await getBuffer(clip.bg,url(clip.bg)):null;
   const ranges=assignedIntervals(clip,ids,original.duration);
   const result=ctx.createBuffer(original.numberOfChannels,original.length,original.sampleRate);

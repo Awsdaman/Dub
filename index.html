@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>دوبلاج</title>
+<link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marhey:wght@400;600;700&display=swap" rel="stylesheet">
@@ -221,6 +222,7 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
 .slate .pl{font-family:var(--kufi);font-weight:900;font-size:clamp(3rem,6vw,5rem);color:var(--wax-0);line-height:1}
 .slate .tt{font-family:var(--marker);font-size:clamp(1.6rem,3vw,2.6rem);font-weight:700}
 .slate .sc{font-size:1.4rem;color:var(--ink-dim)}
+.monitor .loading{position:absolute;inset:0;display:flex;flex-direction:column;gap:1rem;align-items:center;justify-content:center;background:rgba(0,0,0,.72);font-weight:700;font-size:1.3rem;color:var(--ink)}
 
 .bandwrap{position:relative;margin:.9rem calc(-1 * clamp(16px,2.2vw,40px)) 0}
 #band{display:block;width:100%;height:clamp(7rem,14.5vh,11rem)}
@@ -505,9 +507,11 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
     <div class="label" style="margin-top:1.6rem">مين بيدبلج؟</div>
     <div class="tapes" id="dubChips"></div>
     <div class="keys">
+      <button class="key" id="castBackBtn"><svg class="i"><use href="#i-back"/></svg>رجوع للاستوديو</button>
       <button class="key" id="rerollBtn"><svg class="i"><use href="#i-shuffle"/></svg>غيّره</button>
       <button class="key big go" id="toWatchBtn"><svg class="i"><use href="#i-play"/></svg>شوف الأصلي</button>
     </div>
+    <p class="hint" id="clipProgress" role="status" style="justify-content:center;margin-top:1rem"></p>
   </div>
 </section>
 
@@ -522,6 +526,8 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
           <div class="who" id="who"></div>
           <div class="count" id="countdown"></div>
           <div class="slate" id="slate"></div>
+          <div class="loading" id="clipLoading" hidden><span></span></div>
+          <div class="loading" id="syncWait" hidden><span></span><button class="key" id="syncNow">شغّلوا الحين</button></div>
         </div>
       </div>
 
@@ -531,6 +537,7 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
         <!-- watch -->
         <div class="console" id="c-watch">
           <div class="keys">
+            <button class="key" id="watchBackBtn"><svg class="i"><use href="#i-back"/></svg>غيّر الأدوار</button>
             <button class="key" id="replayOrigBtn"><svg class="i"><use href="#i-replay"/></svg>عيده</button>
             <button class="key big rec" id="recBtn"><svg class="i"><use href="#i-rec"/></svg>سجّل</button>
           </div>
@@ -562,7 +569,7 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
             <button class="key" id="reviewPunch"><svg class="i"><use href="#i-rec"/></svg>سجّل من هنا</button>
             <button class="key" id="reviewRedo"><svg class="i"><use href="#i-rec"/></svg>من جديد</button>
           </div>
-          <div class="keys"><button class="key big go" id="reviewNext"><svg class="i"><use href="#i-check"/></svg><span></span></button></div>
+          <div class="keys"><button class="key" id="reviewBackBtn"><svg class="i"><use href="#i-back"/></svg>غيّر الأدوار</button><button class="key big go" id="reviewNext"><svg class="i"><use href="#i-check"/></svg><span></span></button></div>
         </div>
 
         <!-- result -->
@@ -595,7 +602,7 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
             <div id="vote" class="vote"></div>
             <div class="verdict" id="avgWrap">المعدّل <span class="counter" id="avg"></span></div>
           </div>
-          <div class="keys"><button class="key big go" id="nextBtn"><svg class="i"><use href="#i-next"/></svg>اللي بعده</button></div>
+          <div class="keys"><button class="key" id="resultBackBtn"><svg class="i"><use href="#i-back"/></svg>غيّر الأدوار</button><button class="key big go" id="nextBtn"><svg class="i"><use href="#i-next"/></svg>اللي بعده</button></div>
         </div>
 
         <div class="console" id="c-remote" style="display:none">
@@ -890,11 +897,36 @@ async function getBuffer(key, src) {
   trimAudioCache();
   try { const buffer=await p; if(bufCache.get(key)===p){bufferSizes.set(key,buffer.length*buffer.numberOfChannels*4);trimAudioCache();} return buffer; } catch (e) { if(bufCache.get(key)===p)bufCache.delete(key); bufferSizes.delete(key); throw e; }
 }
-function startBuffer(buf, gain, offset) {
+// offset: position in buf that lines up with the picture's current frame. until: picture time to stop at.
+function startBuffer(buf, gain, offset, until = null) {
   const n = ctx.createBufferSource(); n.buffer = buf; n.connect(gain);
   if (offset >= 0) n.start(0, offset); else n.start(ctx.currentTime - offset, 0);
+  if (until != null) n.stop(ctx.currentTime + Math.max(0, until - v.currentTime));
+  Object.assign(n, {gain, lead: offset - v.currentTime, until});
   playing.push(n); return n;
 }
+/* Safety net: if the picture stops to wait for data, the sound and the microphone wait with it.
+   Otherwise the music and voices run on while the picture and subtitles freeze, and a take
+   recorded across the stop ends up out of time with the video. */
+let stalled = false, exportRecorder = null;
+const recorders = () => [recorder, exportRecorder].filter(r => r && r.state !== 'inactive');
+v.addEventListener('waiting', () => {
+  if (v.paused || stalled || (!playing.length && !recorders().length)) return;
+  stalled = true;
+  for (const n of playing) { n.held = true; try { n.stop(); } catch {} }
+  for (const r of recorders()) if (r.state === 'recording') r.pause();
+});
+v.addEventListener('playing', () => {
+  if (!stalled) return;
+  stalled = false;
+  const held = playing.filter(n => n.held);
+  playing = playing.filter(n => !n.held);
+  for (const n of held) {
+    n.disconnect();
+    if (n.until == null || v.currentTime < n.until) startBuffer(n.buffer, n.gain, v.currentTime + n.lead, n.until);
+  }
+  for (const r of recorders()) if (r.state === 'paused') r.resume();
+});
 function stopAll() {
   playToken++;
   for (const n of playing) { try { n.stop(); } catch {} n.disconnect(); n.buffer=null; }
@@ -911,16 +943,65 @@ function beep(freq = 880, dur = .12, vol = .25) {
 }
 
 /* ================= video ================= */
-function loadVideo(clip) {
-  return new Promise((res, rej) => {
-    if (v.dataset.clip === clip.id && v.readyState >= 2) { res(); return; }
-    v.dataset.clip = clip.id;
-    v.src = url(clip.video);
+/* Each clip is downloaded once, completely, and then played from memory. Online, a video that
+   plays while still downloading stops to buffer on slower connections; the same copy also gives
+   the original sound for the recording guide, instead of a second download of the whole video. */
+const clipFiles = new Map();
+function clipFile(clip) {
+  let f = clipFiles.get(clip.video);
+  if (f) { clipFiles.delete(clip.video); clipFiles.set(clip.video, f); return f; }
+  f = {loaded: 0, total: 0, url: null, done: false};
+  f.blob = (async () => {
+    const r = await fetch(url(clip.video));
+    if (!r.ok) throw new Error('تعذّر تحميل الكليب');
+    f.total = +r.headers.get('content-length') || 0;
+    const reader = r.body.getReader(), parts = [];
+    for (;;) {
+      // a slow connection is fine; give up only when nothing arrives for 30 seconds
+      let idle;
+      const chunk = await Promise.race([reader.read(), new Promise((_, rej) => idle = setTimeout(() => rej(new Error('انقطع تحميل الكليب')), 30000))])
+        .finally(() => clearTimeout(idle)).catch(e => { reader.cancel().catch(() => {}); throw e; });
+      if (chunk.done) break;
+      parts.push(chunk.value); f.loaded += chunk.value.length;
+    }
+    const blob = new Blob(parts, {type: r.headers.get('content-type') || 'video/mp4'});
+    f.url = URL.createObjectURL(blob); f.done = true;
+    return blob;
+  })();
+  f.blob.catch(() => { if (clipFiles.get(clip.video) === f) clipFiles.delete(clip.video); });
+  clipFiles.set(clip.video, f);
+  for (const [key, old] of clipFiles) {  // keep the last three clips in memory
+    if (clipFiles.size <= 3) break;
+    if (old.url && v.src === old.url) continue;
+    if (old.url) URL.revokeObjectURL(old.url);
+    clipFiles.delete(key);
+  }
+  return f;
+}
+const loadPct = f => f.total ? Math.min(99, Math.floor(f.loaded / f.total * 100)) : null;
+let loadId = 0, loading = null;
+async function loadVideo(clip) {
+  if (v.dataset.clip === clip.id && v.readyState >= 2) return;
+  const my = ++loadId, f = clipFile(clip);
+  loading = f;
+  try { await f.blob; } finally { if (loading === f) loading = null; }
+  if (my !== loadId || (v.dataset.clip === clip.id && v.readyState >= 2)) return;
+  v.dataset.clip = clip.id;
+  await new Promise((res, rej) => {
     v.oncanplay = () => { v.oncanplay = null; res(); };
     v.onerror = () => rej(new Error('video'));
-    v.load();
+    v.src = f.url; v.load();
   });
 }
+// download progress on the monitor while a clip is still coming in, and under the clip's title
+(function loadLoop() {
+  const f = loading;
+  $('#clipLoading').hidden = !f;
+  if (f) $('#clipLoading span').textContent = 'يحمّل الكليب… ' + (loadPct(f) ?? '') + (f.total ? '%' : '');
+  const pick = S.current && $('#s-spin').classList.contains('on') && clipFiles.get(S.current.video);
+  $('#clipProgress').textContent = pick && !pick.done ? 'يحمّل الكليب ' + (loadPct(pick) ?? '') + (pick.total ? '%' : '') + ' — يشتغل بدون تقطيع بعد ما يخلص' : '';
+  setTimeout(loadLoop, 250);
+})();
 async function seekTo(t) {
   if (Math.abs(v.currentTime - t) < .001) return;
   await new Promise(r => { v.onseeked = () => { v.onseeked = null; r(); }; v.currentTime = t; });
@@ -1335,6 +1416,8 @@ async function watchOriginal() {
   if (!await enterBooth(S.current)) return;
   v.muted = false;
   await seekZero();
+  // with players connected from other devices, everyone starts the original together (studio.js)
+  if (typeof watchTogether === 'function' && !await watchTogether(S.current)) return;
   v.play();
 }
 $('#replayOrigBtn').onclick = watchOriginal;
@@ -1425,7 +1508,7 @@ async function captureTake(clip, {hearBg = false, status = () => {}, base = null
     seg.offset = (performance.now()-t0)/1000-v.currentTime;
     band.clock = () => v.currentTime; $('#pauseRecBtn').disabled = false;
     if (bg) startBuffer(bg,bgGain,v.currentTime);
-    if (prev) startBuffer(prev, voiceGain, v.currentTime).stop(ctx.currentTime + Math.max(0, at - v.currentTime));
+    if (prev) startBuffer(prev, voiceGain, v.currentTime, at);
     const goLive = () => { band.punchAt = null; status('recording'); lamp('on'); $('#monitor').classList.add('live'); };
     if (!lead) goLive();
     else (function wait() { if (tape.live !== seg) return; if (v.currentTime >= at) goLive(); else requestAnimationFrame(wait); })();
@@ -1568,7 +1651,7 @@ async function playDub(entry, {exportFile = false, from = 0, to = null} = {}) {
   const token = playToken;
   initAudio();
   await mediaDeadline(ctx.resume(),10000,'تعذّر تشغيل الصوت. اضغط عيدها ثم جرّب التنزيل.');
-  await mediaDeadline(loadVideo(entry.clip),15000,'تأخر تحميل الفيديو. تأكد من الاتصال وجرّب مرة ثانية.');
+  await mediaDeadline(loadVideo(entry.clip),180000,'تأخر تحميل الفيديو. تأكد من الاتصال وجرّب مرة ثانية.');
   v.muted = true;
   setWho(entry.dubbers);
   band.clock = () => v.currentTime; band.countdown = false; band.live = false;
@@ -1585,7 +1668,7 @@ async function playDub(entry, {exportFile = false, from = 0, to = null} = {}) {
     const stream = new MediaStream([...vs.getVideoTracks(), ...mixDest.stream.getAudioTracks()]);
     const vm = ['video/mp4;codecs=avc1.42001E,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a.40.2', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find(m => MediaRecorder.isTypeSupported(m));
     if(!vm)throw new Error('المتصفح ما يدعم صيغة تنزيل الفيديو. جرّب Chrome أو Edge على الكمبيوتر.');
-    rec = new MediaRecorder(stream, {mimeType: vm, videoBitsPerSecond: 6e6});
+    exportRecorder = rec = new MediaRecorder(stream, {mimeType: vm, videoBitsPerSecond: 6e6});
     rec.ondataavailable = e => e.data.size && chunks.push(e.data);
     // Do not wait for the recorder before playing: a captured paused video or
     // suspended audio engine may produce no frames until playback begins.
