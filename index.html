@@ -610,6 +610,13 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
           <button class="key" id="remoteCancel">ألغِ</button>
           <div id="remoteRecovery" hidden><button class="key big go" id="remoteRetry">اطلب مرة ثانية</button><button class="key" id="remoteSkip">تخطَّ</button></div>
         </div>
+        <!-- on a remote device: a dub recorded elsewhere, to watch and vote on -->
+        <div class="console" id="c-seat-dub" style="display:none">
+          <p class="seat-notice" id="seatDubTitle" role="status"></p>
+          <div id="seatDubVote" hidden><p class="label">كم تعطونه من ١٠؟</p><div id="seatDubPads" class="pads"></div></div>
+          <p id="seatDubStatus" role="status" aria-live="polite"></p>
+          <div class="keys"><button class="key" id="seatDubReplay"><svg class="i"><use href="#i-replay"/></svg>اسمعها مرة ثانية</button></div>
+        </div>
         <div class="console" id="c-seat" style="display:none">
           <p id="seatTakeStatus" role="status" aria-live="polite"></p><progress id="seatUpload" aria-label="يرفع التسجيل" hidden></progress>
           <div class="keys"><button class="key" id="seatWatch">شوف الأصلي</button><button class="key big rec" id="seatRecord">سجّل</button></div>
@@ -777,7 +784,7 @@ function show(id) {
 let shownControls = null;
 function controls(id) {
   shownControls = id;
-  ['c-watch', 'c-record', 'c-review', 'c-result', 'c-reel', 'c-remote', 'c-seat'].forEach(c => $('#' + c).style.display = c === id ? 'flex' : 'none');
+  ['c-watch', 'c-record', 'c-review', 'c-result', 'c-reel', 'c-remote', 'c-seat', 'c-seat-dub'].forEach(c => $('#' + c).style.display = c === id ? 'flex' : 'none');
   $('#vuSide').style.display = id === 'c-record' || id === 'c-watch' ? 'block' : 'none';
 }
 let toastT;
@@ -1701,7 +1708,10 @@ function showResult() {
   renderVote();
   sendHostPhase('result');
   openRemoteVote();
-  playDub(S.last).catch(() => toast('اضغط عيدها لتشغيل الدبلجة'));
+  // with players on other devices, the dub is sent to them first and plays everywhere together (studio.js)
+  const entry = S.last;
+  (typeof shareResult === 'function' ? shareResult(entry) : Promise.resolve(true))
+    .then(go => go && S.last === entry && playDub(entry)).catch(() => toast('اضغط عيدها لتشغيل الدبلجة'));
 }
 function syncLabel() {
   const a = S.last.adjust, el = $('#syncLbl');

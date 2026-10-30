@@ -289,16 +289,17 @@ watchOriginal = async function() {
 };
 $('#replayOrigBtn').onclick = watchOriginal;
 $('#duelHearBtn').onclick = () => { if (D?.results[0]) playDub(D.results[0]).catch(() => toast('تعذّر تشغيل الدبلجة')); };
-// neither duelist votes on either take
+// With others in the room, neither duelist votes on either take. When the two duelists are the whole
+// room, each votes on the other's take (never on their own), as usual.
+const duelOutsiders = () => S.players.filter(p => !D.players.includes(p.name)).map(p => p.name);
 const beforeDuelVoters = voters;
 voters = function() {
-  if (!D) return beforeDuelVoters();
-  const vs = S.players.filter(p => !D.players.includes(p.name)).map(p => p.name);
-  return vs.length ? vs : ['الجمهور'];
+  if (!D || !duelOutsiders().length) return beforeDuelVoters();
+  return duelOutsiders();
 };
 const beforeDuelRemoteVote = openRemoteVote;
 openRemoteVote = function() {
-  if (!D || !S.last) return beforeDuelRemoteVote.apply(this, arguments);
+  if (!D || !S.last || !duelOutsiders().length) return beforeDuelRemoteVote.apply(this, arguments);
   const real = S.last.dubbers;
   S.last.dubbers = [...new Set([...real, ...D.players])];
   try { return beforeDuelRemoteVote.apply(this, arguments); } finally { S.last.dubbers = real; }
@@ -379,7 +380,7 @@ async function watchTogether(clip) {
   fire('watch_play', {clipId: clip.id});
   return true;
 }
-$('#syncNow').onclick = () => { if (watchSync) watchSync.now = true; };
+$('#syncNow').onclick = () => { if (watchSync) watchSync.now = true; if (dubShare) dubShare.now = true; };
 remote.on('watch_ready', p => { if (RS.role === 'host' && watchSync?.clipId === p.clipId) watchSync.ready.add(p.sender); });
 const beforeSyncControls = controls;
 controls = function(id) { if (id !== 'c-watch') { watchSync = null; $('#syncWait').hidden = true; } return beforeSyncControls.apply(this, arguments); };
@@ -414,3 +415,117 @@ remote.on('watch_play', p => {
 remote.on('state', p => { if (RS.role === 'seat' && p.sender === RS.host && p.phase !== 'watch') stopSeatWatch(); });
 remote.on('your_turn', () => { seatWatch = null; });
 v.addEventListener('ended', () => { if (RS.role === 'seat' && seatWatch) stopSeatWatch(); });
+
+/* ================= a finished dub on every device ================= */
+// The host sends each finished take to the connected devices, so remote players watch it with the
+// room and vote from their own screen (in a head-to-head, before their own turn).
+let dubShare = null;
+const forgetShare = () => { if (dubShare?.path) remote.remove(dubShare.path).catch(() => {}); dubShare = null; };
+async function shareResult(entry) {
+  forgetShare();
+  if (RS.role !== 'host') return true;
+  const seats = [...E.peers.values()].filter(id => remote.online(id));
+  if (!seats.length) return true;
+  const token = playToken, share = dubShare = {takeId: entry.id, ready: new Set(), now: false};
+  const gone = () => token !== playToken || dubShare !== share || S.last !== entry;
+  $('#syncWait').hidden = false; $('#syncWait span').textContent = 'نرسل الدبلجة لأجهزة الشباب…';
+  try {
+    const path = RS.room + '/' + crypto.randomUUID() + '.' + extension(entry.blob.type);
+    await remote.upload(path, entry.blob); share.path = path;
+    const signedUrl = await remote.sign(path);
+    if (gone()) return false;
+    fire('dub_prepare', {takeId: entry.id, clipId: entry.clip.id, path, signedUrl, offset: entry.offset, adjust: entry.adjust || 0,
+      mime: entry.blob.type, dubbers: entry.dubbers, characters: entry.characters || null});
+  } catch (e) {
+    console.warn('The dub could not be sent to the other devices', e);
+    $('#syncWait').hidden = true;
+    return !gone();
+  }
+  const started = performance.now();
+  while (seats.some(id => !share.ready.has(id)) && !share.now && performance.now() - started < 45000) {
+    if (gone()) { $('#syncWait').hidden = true; return false; }
+    $('#syncWait span').textContent = `ننتظر أجهزة الشباب يجهّزون الدبلجة… ${share.ready.size} من ${seats.length}`;
+    await sleep(150);
+  }
+  $('#syncWait').hidden = true;
+  share.live = true;
+  return !gone();
+}
+remote.on('dub_ready', p => { if (RS.role === 'host' && dubShare?.takeId === p.takeId) dubShare.ready.add(p.sender); });
+// every playback of the shared dub on the result screen (the first one, عيدها, dragging the band) plays there too
+const beforeSharePlay = playDub;
+playDub = function(entry, opts = {}) {
+  if (RS.role === 'host' && dubShare?.live && dubShare.takeId === entry?.id && entry === S.last && !opts.exportFile && shownControls === 'c-result')
+    fire('dub_play', {takeId: entry.id, from: opts.from || 0});
+  return beforeSharePlay.apply(this, arguments);
+};
+const beforeShareHome = goHome;
+goHome = function() { forgetShare(); return beforeShareHome.apply(this, arguments); };
+
+// on a remote device
+let seatDub = null;
+function renderSeatDub() {
+  const dub = seatDub; if (!dub?.entry) return;
+  show('s-play'); controls('c-seat-dub'); setWho(dub.entry.dubbers);
+  $('#seatDubTitle').textContent = 'دبلجة ' + names(dub.entry.dubbers);
+  const voting = S.scored && RS.vote?.takeId === dub.takeId;
+  $('#seatDubVote').hidden = !voting;
+  if (!voting) { $('#seatDubStatus').textContent = dub.entry.dubbers.includes(RS.name) ? 'هذي دبلجتك! الشباب يقيّمونها الحين' : ''; return; }
+  $('#seatDubPads').style.setProperty('--c', waxOf(RS.name));
+  $('#seatDubPads').innerHTML = Array.from({length: 10}, (_, i) => `<button class="pad" data-score="${i + 1}" ${RS.vote.closed ? 'disabled' : ''}>${i + 1}</button>`).join('');
+  $('#seatDubStatus').textContent = RS.vote.closed ? 'تقفل التصويت' : '';
+  $('#seatDubPads').onclick = async e => {
+    const b = e.target.closest('button'), vote = RS.vote;
+    if (!b || !vote || vote.closed || vote.takeId !== dub.takeId) return;
+    try {
+      await remote.send('vote', {takeId: vote.takeId, score: +b.dataset.score, to: RS.host});
+      $('#seatDubPads').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+      $('#seatDubStatus').textContent = 'وصل تصويتك';
+    } catch { $('#seatDubStatus').textContent = 'ما وصل التصويت. جرّب مرة ثانية'; }
+  };
+}
+function playSeatDub(from) {
+  const dub = seatDub; if (!dub?.entry) return;
+  playDub(dub.entry, {from: Math.max(0, Math.min(v.duration - .1, from))}).catch(() => {});
+}
+function stopSeatDub() {
+  if (!seatDub) return;
+  seatDub = null; stopAll();
+  if (!RS.turn && !seatWatch) seatWaiting();
+}
+remote.on('dub_prepare', async p => {
+  if (RS.role !== 'seat' || !RS.accepted || p.sender !== RS.host || captureBusy) return;
+  if (RS.turn && RS.turn.takeId !== p.takeId) return;  // busy with their own turn
+  const clip = S.clips.find(c => c.id === p.clipId);
+  if (!clip || !Number.isFinite(p.offset) || !/^audio\/(webm|mp4|ogg|wav)/.test(p.mime || '')) return;
+  const dub = seatDub = {takeId: p.takeId, playAt: null, from: 0};
+  seatWatch = null;
+  try {
+    const r = await fetch(remote.downloadUrl(p.path, p.signedUrl), {signal: AbortSignal.timeout(60000)});
+    if (!r.ok) throw new Error('download');
+    const blob = new Blob([await r.blob()], {type: p.mime});
+    const entry = {id: 'shared-' + p.takeId, clip, dubbers: p.dubbers || [], blob, offset: p.offset, adjust: +p.adjust || 0, characters: p.characters, score: null};
+    stopAll(); S.current = clip;
+    if (!await enterBooth(clip) || seatDub !== dub) return;
+    await getBuffer(entry.id, blob);
+    if (seatDub !== dub) return;
+    dub.entry = entry; renderSeatDub();
+    fire('dub_ready', {takeId: p.takeId, to: RS.host});
+    // the host already started: join at its position
+    if (dub.playAt != null) playSeatDub(dub.from + (performance.now() - dub.playAt) / 1000);
+  } catch (e) { console.warn('Shared dub unavailable', e); if (seatDub === dub) stopSeatDub(); }
+});
+remote.on('dub_play', p => {
+  if (RS.role !== 'seat' || p.sender !== RS.host || seatDub?.takeId !== p.takeId) return;
+  if (seatDub.entry) playSeatDub(+p.from || 0);
+  else { seatDub.playAt = performance.now(); seatDub.from = +p.from || 0; }
+});
+$('#seatDubReplay').onclick = () => playSeatDub(0);
+// voting opens or closes while the dub is on screen
+// (the stock handler registered at start-up shows the waiting screen; this one runs after it)
+remote.on('vote_open', p => { if (RS.role === 'seat' && p.sender === RS.host && seatDub?.entry && seatDub.takeId === p.takeId) setTimeout(renderSeatDub, 0); });
+remote.on('vote_closed', p => { if (seatDub?.takeId === p.takeId) { $('#seatDubPads').querySelectorAll('button').forEach(b => b.disabled = true); $('#seatDubStatus').textContent = `تقفل التصويت. المعدّل ${p.avg == null ? '—' : fmt(p.avg)}`; } });
+// the host moved on: back to waiting, or straight to their own turn
+remote.on('state', p => { if (RS.role === 'seat' && p.sender === RS.host && p.phase !== 'result') stopSeatDub(); });
+remote.on('your_turn', () => { seatDub = null; });
+remote.on('watch_prepare', () => { seatDub = null; });
