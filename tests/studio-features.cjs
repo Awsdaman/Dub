@@ -1,4 +1,4 @@
-// Re-recording parts, band scrubbing, timing meter, typed editor times and effects, head-to-head with a
+// Re-recording parts, band scrubbing, typed editor times and effects, head-to-head with a
 // remote player who re-records parts (real Supabase, WAV upload), bloopers and points reset.
 // Needs config.local.json and the local server on 8765. Synthetic microphones: a tone whose loudness
 // the test changes between passes, so each pass can be told apart in the final audio.
@@ -62,8 +62,7 @@ const pass=n=>console.log('PASS '+n);
 
  await h.evaluate(()=>stopAll());await dragBand(h,3);
  await waitFor(h,()=>!v.paused&&playing.length>=2);const t1=await h.evaluate(()=>v.currentTime);assert(t1>2.5,'scrub start '+t1);
- await waitFor(h,()=>!$('#timingWrap').hidden);
- pass('Dragging the band on the result plays the dub from that spot; timing meter shows');
+ pass('Dragging the band on the result plays the dub from that spot');
 
  await h.evaluate(()=>{stopAll();v.currentTime=8;});await gain(h,.15);
  await h.locator('#punchBtn').click();await stopAt(h,9.5);await h.locator('#tapeDone').click();await waitFor(h,()=>shownControls==='c-result');

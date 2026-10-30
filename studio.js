@@ -1,4 +1,4 @@
-/* Per-line voice effects, the timing meter and the bloopers reel. Loaded after ensemble.js and recovery.js. */
+/* Per-line voice effects, the bloopers reel, head-to-head, going back, and sharing with remote devices. Loaded after ensemble.js and recovery.js. */
 
 /* ================= voice effects ================= */
 // Set per line in the editing room so the dub matches the original (Mushu's echo, a giant's voice...).
@@ -114,67 +114,6 @@ renderLines = function() {
     select.onchange = () => { if (select.value) l.fx = select.value; else delete l.fx; edMark(); };
     row.append(select);
   });
-};
-
-/* ================= timing meter ================= */
-// Shown to the room only. It never touches the votes.
-// a badge on the picture, where the room is already looking
-document.querySelector('#monitor .scr').insertAdjacentHTML('beforeend',
-  `<div class="timing" id="timingWrap" hidden>
-    <span>نسبة دقتك في الدبلجة كانت <bdi dir="ltr"><span class="counter" id="timingPct"></span>%</bdi></span>
-    <span id="timingNote" class="note"></span>
-    <button class="why" id="timingWhy" aria-expanded="false" aria-controls="timingInfo" aria-label="وش معنى النسبة؟">!</button>
-  </div>`);
-// the explanation sits just under the picture, which clips anything inside it
-$('#monitor').insertAdjacentHTML('beforeend',
-  `<p class="timing-info" id="timingInfo" hidden>النسبة تقيس قد إيش صوتك جا داخل المربعات الصفراء على شريط النص، وهي الأوقات اللي تتكلم فيها الشخصية في الكليب الأصلي، وقد إيش عبّيتها بصوتك. الكلام برا الأصفر أو السكوت داخله ينزّلها. ١٠٠٪ يعني توقيتك مطابق للأصلي. هالنسبة للفلة بس وما تدخل في التصويت.</p>`);
-const timingInfo = open => { $('#timingInfo').hidden = !open; $('#timingWhy').setAttribute('aria-expanded', open); };
-$('#timingWhy').onclick = () => timingInfo($('#timingInfo').hidden);
-document.addEventListener('pointerdown', e => { if (!e.target.closest('#timingWrap, #timingInfo')) timingInfo(false); });
-async function timingScore(entry) {
-  const dur = v.duration;
-  const blocks = entry.characters ? assignedIntervals(entry.clip, entry.characters, dur)
-    : entry.clip.timed?.length ? assignedIntervals(entry.clip, null, dur) : entry.clip.speech || [];
-  if (!blocks.length || !dur) return null;
-  const {buf, offset} = await plainVoiceTrack(entry), x = buf.getChannelData(0), rate = buf.sampleRate;
-  const hop = .02, n = Math.floor(dur / hop), db = new Float32Array(n);
-  for (let k = 0; k < n; k++) {
-    const a = Math.floor((k * hop + offset) * rate), b = a + Math.floor(hop * rate);
-    let sum = 0, cnt = 0;
-    for (let i = Math.max(0, a); i < Math.min(x.length, b); i += 4) { sum += x[i] * x[i]; cnt++; }
-    db[k] = cnt ? 10 * Math.log10(sum / cnt + 1e-10) : -100;
-  }
-  const sorted = [...db].sort((a, b) => a - b), floor = sorted[Math.floor(n * .2)], peak = sorted[Math.floor(n * .98)];
-  if (peak < -55) return 0;  // silence
-  // someone talking through most of the clip leaves no quiet part to measure the room from
-  const thr = peak - floor < 12 ? Math.max(-55, peak - 20) : Math.max(floor + 10, peak - 30);
-  const inside = (t, pad) => blocks.some(([a, b]) => t >= a - pad && t <= b + pad);
-  let talk = 0, talkIn = 0, block = 0, blockTalk = 0;
-  for (let k = 0; k < n; k++) {
-    const t = k * hop, on = db[k] > thr;
-    if (on) { talk++; if (inside(t, .25)) talkIn++; }
-    if (inside(t, 0)) { block++; if (on) blockTalk++; }
-  }
-  if (!talk || !block) return 0;
-  // talking inside the yellow blocks, and filling them
-  const P = talkIn / talk, R = Math.min(1, blockTalk / block / .7);
-  return Math.round(100 * 2 * P * R / (P + R || 1));
-}
-// the badge belongs to the result only
-const beforeTimingControls = controls;
-controls = function(id) { if (id !== 'c-result') { $('#timingWrap').hidden = true; timingInfo(false); } return beforeTimingControls.apply(this, arguments); };
-const beforeTimingResult = showResult;
-showResult = function() {
-  $('#timingWrap').hidden = true;
-  const r = beforeTimingResult.apply(this, arguments), entry = S.last;
-  if (entry) timingScore(entry).then(score => {
-    if (S.last !== entry || score == null) return;
-    const el = $('#timingPct'); delete el.dataset.v; el.innerHTML = '';
-    counter(el, String(Math.min(100, score)));
-    $('#timingNote').textContent = score >= 85 ? 'مضبوط على الشعرة' : score >= 65 ? 'قريب' : 'الصوت طالع برا الأصفر';
-    $('#timingWrap').hidden = false;
-  }).catch(e => console.warn('Timing meter unavailable', e));
-  return r;
 };
 
 /* ================= bloopers ================= */

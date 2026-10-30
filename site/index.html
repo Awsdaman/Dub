@@ -228,12 +228,6 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
 #band{display:block;width:100%;height:clamp(7rem,14.5vh,11rem)}
 #band.scrub{cursor:grab;touch-action:none}
 .bandhint{position:absolute;top:.35rem;inset-inline-start:clamp(16px,2.2vw,40px);font-size:.8rem;font-weight:700;color:#5d5546;background:rgba(236,232,220,.92);padding:0 .5rem;border-radius:.3rem;pointer-events:none}
-.monitor .timing{position:absolute;bottom:.8rem;left:.8rem;direction:rtl;display:flex;align-items:center;gap:.5rem;background:rgba(0,0,0,.78);color:#fff;font-weight:700;font-size:1rem;padding:.25rem .7rem;border-radius:.3rem}
-.monitor .timing .counter{font-size:1.3rem;color:var(--wax-0)}
-.monitor .timing bdi{display:inline-flex;align-items:center;color:var(--wax-0);font-size:1.2rem}
-.monitor .timing .note{font-weight:500;color:var(--ink-dim)}
-.monitor .timing .why{width:1.6rem;height:1.6rem;border-radius:50%;background:var(--wax-0);color:#1b1814;font-weight:900;font-size:1rem;line-height:1;flex:none}
-.monitor .timing-info{position:absolute;top:calc(100% + .4rem);left:.7rem;z-index:6;width:min(24rem,80vw);margin:0;padding:.7rem .9rem;background:#0b0a09;border:1px solid #3a3733;border-radius:.4rem;box-shadow:0 10px 24px rgba(0,0,0,.6);font-weight:500;font-size:.9rem;line-height:1.6;color:var(--ink)}
 #band.scrub:active{cursor:grabbing}
 .bandcap{position:absolute;bottom:.4rem;inset-inline-start:clamp(16px,2.2vw,40px);font-size:.75rem;color:#6e6656;font-weight:500;pointer-events:none}
 
@@ -1466,6 +1460,41 @@ async function renderTape(segs, duration, mask = null) {
   }
   return out;
 }
+/* Players come in a little late: they start a line when it reaches the bar, and every device adds
+   its own sound delay. Each pass is moved earlier by however much its voice lags behind the yellow
+   blocks of the lines being dubbed, and only when that clearly fits better. */
+async function lateness(seg, clip, characters) {
+  const blocks = (clip.timed?.length ? assignedIntervals(clip, characters, v.duration) : clip.speech || [])
+    .map(([a, b]) => [Math.max(a, seg.from), Math.min(b, seg.to)]).filter(([a, b]) => b - a > .05);
+  if (blocks.reduce((n, [a, b]) => n + b - a, 0) < 1) return 0;
+  const audio = await getBuffer(seg.id, seg.blob), x = audio.getChannelData(0), rate = audio.sampleRate;
+  const hop = .01, n = Math.ceil((seg.to - seg.from + 1.2) / hop), db = new Float32Array(n), block = new Uint8Array(n);
+  for (let k = 0; k < n; k++) {
+    const t = seg.from + k * hop, a = Math.floor((t + seg.offset) * rate), b = a + Math.floor(hop * rate);
+    let sum = 0, cnt = 0;
+    for (let i = Math.max(0, a); i < Math.min(x.length, b); i += 2) { sum += x[i] * x[i]; cnt++; }
+    db[k] = cnt ? 10 * Math.log10(sum / cnt + 1e-10) : -100;
+    block[k] = blocks.some(([a, b]) => t >= a && t < b) ? 1 : 0;
+  }
+  const sorted = [...db].sort((a, b) => a - b), floor = sorted[Math.floor(n * .2)], peak = sorted[Math.floor(n * .98)];
+  if (peak < -55) return 0;
+  const thr = peak - floor < 12 ? Math.max(-55, peak - 20) : Math.max(floor + 10, peak - 30), on = db.map(d => d > thr);
+  // how well the voice, moved earlier by `shift` frames, fills the blocks and stays inside them
+  const fit = shift => {
+    let talk = 0, talkIn = 0, blk = 0, blkTalk = 0;
+    for (let k = 0; k < n; k++) {
+      const voice = on[k + shift] || 0;
+      talk += voice; blk += block[k];
+      if (voice && block[k]) { talkIn++; blkTalk++; }
+    }
+    const P = talk ? talkIn / talk : 0, R = blk ? blkTalk / blk : 0;
+    return P + R ? 2 * P * R / (P + R) : 0;
+  };
+  let best = 0, bestFit = fit(0);
+  for (let shift = -20; shift <= 100; shift++) { const f = fit(shift); if (f > bestFit + 1e-9) { bestFit = f; best = shift; } }
+  // move only when the voice clearly follows the lines (a take that ignores them is left as recorded)
+  return bestFit >= .4 && bestFit - fit(0) >= .01 ? best * hop : 0;
+}
 function recPanel(paused) {
   $('#recLive').hidden = paused; $('#recLiveHint').hidden = paused; $('#recPaused').hidden = !paused;
   // nothing to meter while stopped; on phones this keeps the band on screen
@@ -1529,7 +1558,7 @@ async function captureTake(clip, {hearBg = false, status = () => {}, base = null
     localRecorder.stop(); await stopped; cancelled();
     seg.blob = new Blob(chunks,{type:localRecorder.mimeType || mime || 'audio/webm'});
     if (!seg.blob.size) throw new Error('التسجيل طلع فاضي');
-    if (seg.to - seg.from > .05) { tape.segs.push(seg); mixP = null; }
+    if (seg.to - seg.from > .05) { seg.offset += await lateness(seg, clip, characters); tape.segs.push(seg); mixP = null; }
     if (why !== 'end' && seg.to - seg.from > 1 && typeof keepBlooper === 'function')
       keepBlooper({clip, dubbers: [...S.dubbers], characters, blob: seg.blob, offset: seg.offset, from: Math.max(seg.from, seg.to - 5), to: seg.to});
     return why === 'end';
