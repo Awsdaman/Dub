@@ -1,5 +1,579 @@
 [
   {
+    "id": "Rio-55-Movie-SnapYT.App",
+    "title": "Rio 55 Movie SnapYT.App",
+    "voices": 5,
+    "characters": [
+      {
+        "id": "c1",
+        "name": "Nico"
+      },
+      {
+        "id": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "name": "Pedro"
+      },
+      {
+        "id": "c-28bf3b78-1a40-43ff-b06e-d3297d3831cc",
+        "name": "Joel"
+      },
+      {
+        "id": "c-4903aabf-1518-46a9-ba3c-3064859fdf98",
+        "name": "Blu"
+      },
+      {
+        "id": "c-9fb66707-f0c8-415f-b976-de1dd9fc100d",
+        "name": "Rafael"
+      }
+    ],
+    "lines": "Rafe have some special guests from outta town\nand let's show them some love because i don't think they get out much\nyoyoyyoyo\neverybody put them wings together\nand clap as loud as you can\nflap'em\nclap'em\ni don't care slap'em\naaahaahaaa(bird sound)\nparty in epinema baby\ni wanna party\ni wanna samba\ni wanna party\ni wanna samba\ni wanna party\nand live my life\ni wanna party\nand flyyyyyy\ni'm gonna flyyy\nflyy just like a biird\n?but you are a bird\noh yeah you're right so let me fly just like a rocket then\n!ok\nfly so high where i need to come down for oxygen\n!hey\ncause once we starting baby ain't ain't no stoping then\n!hey\ncause i just wanna live my life and party\n!hey\nall i want is to be free and rock my body\n!ok\nbeen around the world that i wanna live my life\nin rio\ncause in rio\nrio real life\n?what are you doing\ni.. i don't know\nalright blu\ni'm that samba\nsamba master\nmaster master master master\nwho shouts out from i get your\nblaster blaster blaster blaster\nyou dance fast but i dance\nheey she likes you\n?what are you talking about\n?haven't you been listening\n!no\nbut i've been watching\njust be yourself\ngo on\nfaster faster faster faster\nyou're too slow you need to catch up\nyou need to catch up\nyou can dance and dance",
+    "speech": [
+      [
+        0.2,
+        6.38
+      ],
+      [
+        6.76,
+        17.84
+      ],
+      [
+        20.84,
+        22.16
+      ],
+      [
+        22.68,
+        24.0
+      ],
+      [
+        24.36,
+        25.86
+      ],
+      [
+        26.38,
+        27.64
+      ],
+      [
+        28.24,
+        29.52
+      ],
+      [
+        29.9,
+        37.72
+      ],
+      [
+        38.16,
+        62.66
+      ],
+      [
+        63.14,
+        63.6
+      ],
+      [
+        64.08,
+        109.32
+      ]
+    ],
+    "timed": [
+      {
+        "start": 0,
+        "end": 2.85,
+        "text": "Rafe have some special guests from outta town",
+        "character": "c1"
+      },
+      {
+        "start": 2.73,
+        "end": 6.61,
+        "text": "and let's show them some love because i don't think they get out much",
+        "character": "c1",
+        "characters": [
+          "c1"
+        ]
+      },
+      {
+        "start": 6.67,
+        "end": 7.67,
+        "text": "yoyoyyoyo",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 7.67,
+        "end": 9.68,
+        "text": "everybody put them wings together",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 9.92,
+        "end": 11.28,
+        "text": "and clap as loud as you can",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 11.38,
+        "end": 12.05,
+        "text": "flap'em",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 12.05,
+        "end": 12.86,
+        "text": "clap'em",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 12.86,
+        "end": 14.23,
+        "text": "i don't care slap'em",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 14.06,
+        "end": 15.83,
+        "text": "aaahaahaaa(bird sound)",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 15.83,
+        "end": 17.87,
+        "text": "party in epinema baby",
+        "character": "c1",
+        "characters": [
+          "c1"
+        ]
+      },
+      {
+        "start": 20.71,
+        "end": 22.2,
+        "text": "i wanna party",
+        "character": "c1",
+        "characters": [
+          "c1",
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 22.33,
+        "end": 24.12,
+        "text": "i wanna samba",
+        "character": "c1",
+        "characters": [
+          "c1",
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 24.3,
+        "end": 25.94,
+        "text": "i wanna party",
+        "character": "c1",
+        "characters": [
+          "c1",
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 26.25,
+        "end": 27.92,
+        "text": "i wanna samba",
+        "character": "c1",
+        "characters": [
+          "c1",
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 28.11,
+        "end": 29.58,
+        "text": "i wanna party",
+        "character": "c1",
+        "characters": [
+          "c1",
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 29.95,
+        "end": 31.41,
+        "text": "and live my life",
+        "character": "c1",
+        "characters": [
+          "c1",
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 31.87,
+        "end": 33.27,
+        "text": "i wanna party",
+        "character": "c1",
+        "characters": [
+          "c1",
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 33.98,
+        "end": 36.23,
+        "text": "and flyyyyyy",
+        "character": "c1",
+        "characters": [
+          "c1",
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 36.51,
+        "end": 37.8,
+        "text": "i'm gonna flyyy",
+        "character": "c1",
+        "characters": [
+          "c1"
+        ]
+      },
+      {
+        "start": 38.02,
+        "end": 40.0,
+        "text": "flyy just like a biird",
+        "character": "c1",
+        "characters": [
+          "c1"
+        ]
+      },
+      {
+        "start": 39.2,
+        "end": 40.42,
+        "text": "?but you are a bird",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 40.25,
+        "end": 43.63,
+        "text": "oh yeah you're right so let me fly just like a rocket then",
+        "character": "c1",
+        "characters": [
+          "c1"
+        ]
+      },
+      {
+        "start": 43.46,
+        "end": 44.21,
+        "text": "!ok",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 44.13,
+        "end": 47.27,
+        "text": "fly so high where i need to come down for oxygen",
+        "character": "c1",
+        "characters": [
+          "c1"
+        ]
+      },
+      {
+        "start": 47.27,
+        "end": 47.72,
+        "text": "!hey",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 47.55,
+        "end": 51.05,
+        "text": "cause once we starting baby ain't ain't no stoping then",
+        "character": "c1",
+        "characters": [
+          "c1"
+        ]
+      },
+      {
+        "start": 51.05,
+        "end": 51.5,
+        "text": "!hey",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 51.65,
+        "end": 54.8,
+        "text": "cause i just wanna live my life and party",
+        "character": "c1",
+        "characters": [
+          "c1"
+        ]
+      },
+      {
+        "start": 54.68,
+        "end": 55.08,
+        "text": "!hey",
+        "character": "c1",
+        "characters": [
+          "c1",
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 55.19,
+        "end": 58.24,
+        "text": "all i want is to be free and rock my body",
+        "character": "c1",
+        "characters": [
+          "c1"
+        ]
+      },
+      {
+        "start": 58.24,
+        "end": 58.81,
+        "text": "!ok",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 58.93,
+        "end": 61.83,
+        "text": "been around the world that i wanna live my life",
+        "character": "c1",
+        "characters": [
+          "c1"
+        ]
+      },
+      {
+        "start": 61.91,
+        "end": 62.63,
+        "text": "in rio",
+        "character": "c1",
+        "characters": [
+          "c1"
+        ]
+      },
+      {
+        "start": 62.81,
+        "end": 63.68,
+        "text": "cause in rio",
+        "character": "c1",
+        "characters": [
+          "c1"
+        ]
+      },
+      {
+        "start": 64.08,
+        "end": 65.89,
+        "text": "rio real life",
+        "character": ""
+      },
+      {
+        "start": 65.18,
+        "end": 66.59,
+        "text": "?what are you doing",
+        "character": "c-28bf3b78-1a40-43ff-b06e-d3297d3831cc",
+        "characters": [
+          "c-28bf3b78-1a40-43ff-b06e-d3297d3831cc"
+        ]
+      },
+      {
+        "start": 66.52,
+        "end": 67.81,
+        "text": "i.. i don't know",
+        "character": "c-4903aabf-1518-46a9-ba3c-3064859fdf98",
+        "characters": [
+          "c-4903aabf-1518-46a9-ba3c-3064859fdf98"
+        ]
+      },
+      {
+        "start": 69.63,
+        "end": 70.93,
+        "text": "alright blu",
+        "character": "c-9fb66707-f0c8-415f-b976-de1dd9fc100d",
+        "characters": [
+          "c-9fb66707-f0c8-415f-b976-de1dd9fc100d"
+        ]
+      },
+      {
+        "start": 73.09,
+        "end": 74.22,
+        "text": "i'm that samba",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 74.22,
+        "end": 75.07,
+        "text": "samba master",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 75.07,
+        "end": 76.96,
+        "text": "master master master master",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 76.91,
+        "end": 78.72,
+        "text": "who shouts out from i get your",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 78.72,
+        "end": 80.78,
+        "text": "blaster blaster blaster blaster",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 80.76,
+        "end": 81.83,
+        "text": "you dance fast but i dance",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 81.6,
+        "end": 82.99,
+        "text": "heey she likes you",
+        "character": "c-9fb66707-f0c8-415f-b976-de1dd9fc100d",
+        "characters": [
+          "c-9fb66707-f0c8-415f-b976-de1dd9fc100d"
+        ]
+      },
+      {
+        "start": 82.93,
+        "end": 83.78,
+        "text": "?what are you talking about",
+        "character": "c-4903aabf-1518-46a9-ba3c-3064859fdf98",
+        "characters": [
+          "c-4903aabf-1518-46a9-ba3c-3064859fdf98"
+        ]
+      },
+      {
+        "start": 83.78,
+        "end": 84.74,
+        "text": "?haven't you been listening",
+        "character": "c-4903aabf-1518-46a9-ba3c-3064859fdf98",
+        "characters": [
+          "c-4903aabf-1518-46a9-ba3c-3064859fdf98"
+        ]
+      },
+      {
+        "start": 84.68,
+        "end": 85.38,
+        "text": "!no",
+        "character": "c-9fb66707-f0c8-415f-b976-de1dd9fc100d",
+        "characters": [
+          "c-9fb66707-f0c8-415f-b976-de1dd9fc100d"
+        ]
+      },
+      {
+        "start": 85.44,
+        "end": 86.42,
+        "text": "but i've been watching",
+        "character": "c-9fb66707-f0c8-415f-b976-de1dd9fc100d",
+        "characters": [
+          "c-9fb66707-f0c8-415f-b976-de1dd9fc100d"
+        ]
+      },
+      {
+        "start": 86.54,
+        "end": 87.53,
+        "text": "just be yourself",
+        "character": "c-9fb66707-f0c8-415f-b976-de1dd9fc100d",
+        "characters": [
+          "c-9fb66707-f0c8-415f-b976-de1dd9fc100d"
+        ]
+      },
+      {
+        "start": 87.8,
+        "end": 88.62,
+        "text": "go on",
+        "character": "c-9fb66707-f0c8-415f-b976-de1dd9fc100d",
+        "characters": [
+          "c-9fb66707-f0c8-415f-b976-de1dd9fc100d"
+        ]
+      },
+      {
+        "start": 82.14,
+        "end": 84.53,
+        "text": "faster faster faster faster",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 84.47,
+        "end": 85.37,
+        "text": "you're too slow you need to catch up",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 85.39,
+        "end": 86.28,
+        "text": "you need to catch up",
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
+      },
+      {
+        "start": 86.28,
+        "end": 87.67,
+        "text": "you can dance and dance",
+        "character": ""
+      }
+    ],
+    "video": "clips/Rio-55-Movie-SnapYT.App.mp4",
+    "bg": "processed/Rio-55-Movie-SnapYT.App.bg.mp3",
+    "thumb": "processed/Rio-55-Movie-SnapYT.App.jpg"
+  },
+  {
     "id": "الملحلح موشو",
     "title": "الملحلح موشو",
     "voices": 2,
