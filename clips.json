@@ -1,7 +1,7 @@
 [
  {
-  "id": "Rio-55-Movie-SnapYT.App",
-  "title": "Rio 55 Movie SnapYT.App",
+  "id": "Rio",
+  "title": "Rio",
   "voices": 5,
   "characters": [
    {
@@ -25,9 +25,9 @@
     "name": "Rafael"
    }
   ],
-  "video": "clips/Rio-55-Movie-SnapYT.App.mp4",
-  "bg": "processed/Rio-55-Movie-SnapYT.App.bg.mp3",
-  "thumb": "processed/Rio-55-Movie-SnapYT.App.jpg",
+  "video": "clips/Rio.mp4",
+  "bg": "processed/Rio.bg.mp3",
+  "thumb": "processed/Rio.jpg",
   "lines": "Rafe have some special guests from outta town\nand let's show them some love because i don't think they get out much\nyoyoyyoyo\neverybody put them wings together\nand clap as loud as you can\nflap'em\nclap'em\ni don't care slap'em\naaahaahaaa(bird sound)\nparty in epinema baby\ni wanna party\ni wanna samba\ni wanna party\ni wanna samba\ni wanna party\nand live my life\ni wanna party\nand flyyyyyy\ni'm gonna flyyy\nflyy just like a biird\n?but you are a bird\noh yeah you're right so let me fly just like a rocket then\n!ok\nfly so high where i need to come down for oxygen\n!hey\ncause once we starting baby ain't ain't no stoping then\n!hey\ncause i just wanna live my life and party\n!hey\nall i want is to be free and rock my body\n!ok\nbeen around the world that i wanna live my life\nin rio\ncause in rio\nrio real life\n?what are you doing\ni.. i don't know\nalright blu\ni'm that samba\nsamba master\nmaster master master master\nwho shouts out from i get your\nblaster blaster blaster blaster\nyou dance fast but i dance\nheey she likes you\n?what are you talking about\n?haven't you been listening\n!no\nbut i've been watching\njust be yourself\ngo on\nfaster faster faster faster\nyou're too slow you need to catch up\nyou need to catch up\nyou can dance and dance",
   "speech": [
    [
@@ -44,10 +44,6 @@
    ],
    [
     22.68,
-    24.0
-   ],
-   [
-    24.36,
     25.86
    ],
    [
@@ -56,19 +52,15 @@
    ],
    [
     28.24,
-    29.52
-   ],
-   [
-    29.9,
     37.72
    ],
    [
     38.16,
-    62.66
+    62.64
    ],
    [
     63.14,
-    63.6
+    63.58
    ],
    [
     64.08,
@@ -573,7 +565,7 @@
    }
   ],
   "edit": {
-   "source": "originals/Rio-55-Movie-SnapYT.App.mp4",
+   "source": "originals/Rio.mp4",
    "trim": {
     "in": 0.0,
     "out": 109.321

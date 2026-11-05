@@ -1,7 +1,7 @@
 [
   {
-    "id": "Rio-55-Movie-SnapYT.App",
-    "title": "Rio 55 Movie SnapYT.App",
+    "id": "Rio",
+    "title": "Rio",
     "voices": 5,
     "characters": [
       {
@@ -41,10 +41,6 @@
       ],
       [
         22.68,
-        24.0
-      ],
-      [
-        24.36,
         25.86
       ],
       [
@@ -53,19 +49,15 @@
       ],
       [
         28.24,
-        29.52
-      ],
-      [
-        29.9,
         37.72
       ],
       [
         38.16,
-        62.66
+        62.64
       ],
       [
         63.14,
-        63.6
+        63.58
       ],
       [
         64.08,
@@ -569,9 +561,9 @@
         "character": ""
       }
     ],
-    "video": "clips/Rio-55-Movie-SnapYT.App.mp4",
-    "bg": "processed/Rio-55-Movie-SnapYT.App.bg.mp3",
-    "thumb": "processed/Rio-55-Movie-SnapYT.App.jpg"
+    "video": "clips/Rio.mp4",
+    "bg": "processed/Rio.bg.mp3",
+    "thumb": "processed/Rio.jpg"
   },
   {
     "id": "الملحلح موشو",
