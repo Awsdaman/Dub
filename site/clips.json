@@ -41,6 +41,10 @@
       ],
       [
         22.68,
+        24.0
+      ],
+      [
+        24.36,
         25.86
       ],
       [
@@ -60,7 +64,7 @@
         63.58
       ],
       [
-        64.08,
+        64.1,
         109.32
       ]
     ],
@@ -381,7 +385,10 @@
         "start": 64.08,
         "end": 65.89,
         "text": "rio real life",
-        "character": ""
+        "character": "c1",
+        "characters": [
+          "c1"
+        ]
       },
       {
         "start": 65.18,
@@ -558,7 +565,10 @@
         "start": 86.28,
         "end": 87.67,
         "text": "you can dance and dance",
-        "character": ""
+        "character": "c-4571f965-5a19-4905-99be-773e9b69c6b2",
+        "characters": [
+          "c-4571f965-5a19-4905-99be-773e9b69c6b2"
+        ]
       }
     ],
     "video": "clips/Rio.mp4",
