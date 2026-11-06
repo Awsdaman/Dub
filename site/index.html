@@ -249,6 +249,9 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
 .nudge .row{display:flex;gap:.5rem;align-items:center}
 .nudge .key{min-width:var(--key-m);padding:0}
 .nudge .counter{font-size:1.2rem;min-width:4.6rem;justify-content:center}
+.hear-lag{display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;color:var(--ink-dim);font-size:.9rem}
+.hear-lag .key{min-width:var(--key-m);padding:0}
+.hear-lag bdi{min-width:3.6rem;text-align:center;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
 
 /* voting */
 .vote{width:100%;display:flex;flex-direction:column;gap:.5rem;align-items:center}
@@ -536,6 +539,7 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
             <button class="key big rec" id="recBtn"><svg class="i"><use href="#i-rec"/></svg>سجّل</button>
           </div>
           <label class="hint" id="hearBgWrap"><input type="checkbox" id="hearBg" checked> اسمعوا الموسيقى وقت التسجيل (بالسماعة بس)</label>
+          <div class="hear-lag"></div>
         </div>
 
         <!-- record -->
@@ -553,6 +557,7 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
               <button class="key flat" id="cancelRecBtn"><svg class="i"><use href="#i-x"/></svg>ألغِ التسجيل</button>
             </div>
           </div>
+          <div class="hear-lag"></div>
         </div>
 
         <!-- review: several players on one device check their own take before the next one -->
@@ -615,6 +620,7 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
           <p id="seatTakeStatus" role="status" aria-live="polite"></p><progress id="seatUpload" aria-label="يرفع التسجيل" hidden></progress>
           <div class="keys"><button class="key" id="seatWatch">شوف الأصلي</button><button class="key big rec" id="seatRecord">سجّل</button></div>
           <label class="hint"><input type="checkbox" id="seatHearBg"> اسمع الموسيقى بالسماعة وقت التسجيل</label>
+          <div class="hear-lag"></div>
           <div id="seatPreview" hidden><button class="key" id="seatReplay">اسمع دبلجتك</button><button class="key" id="seatPunch">سجّل من هنا</button><button class="key big go" id="seatSend">أرسلها</button></div>
           <button class="key flat" id="seatCancel">ألغِ الدور</button>
         </div>
@@ -899,12 +905,35 @@ async function getBuffer(key, src) {
   try { const buffer=await p; if(bufCache.get(key)===p){bufferSizes.set(key,buffer.length*buffer.numberOfChannels*4);trimAudioCache();} return buffer; } catch (e) { if(bufCache.get(key)===p)bufCache.delete(key); bufferSizes.delete(key); throw e; }
 }
 // offset: position in buf that lines up with the picture's current frame. until: picture time to stop at.
+/* Bluetooth headphones play everything late, and later still once the microphone is open, while the
+   picture stays on time. The sound starts this far ahead so it reaches the ears with the picture.
+   The browser's own figure often leaves Bluetooth out, so the player can add to it by ear. A saved
+   video is not affected: nothing in it goes through the headphones. */
+let hearLag = 0;
+try { hearLag = Math.max(0, Math.min(480, +localStorage.getItem('dub-hear-lag') || 0)); } catch {}
+const exporting = () => !!exportRecorder && exportRecorder.state !== 'inactive';
+const hearLead = () => exporting() ? 0 : (ctx?.outputLatency || 0) + hearLag / 1000;
 function startBuffer(buf, gain, offset, until = null) {
+  const lead = offset - v.currentTime; offset += hearLead();
   const n = ctx.createBufferSource(); n.buffer = buf; n.connect(gain);
   if (offset >= 0) n.start(0, offset); else n.start(ctx.currentTime - offset, 0);
   if (until != null) n.stop(ctx.currentTime + Math.max(0, until - v.currentTime));
-  Object.assign(n, {gain, lead: offset - v.currentTime, until});
+  Object.assign(n, {gain, lead, until});
   playing.push(n); return n;
+}
+function setHearLag(ms) {
+  hearLag = Math.max(0, Math.min(480, ms));
+  try { localStorage.setItem('dub-hear-lag', hearLag); } catch {}
+  document.querySelectorAll('.hearLagVal').forEach(el => el.textContent = hearLag);
+  if (v.paused || exporting()) return;
+  // already playing: move the sound now, so the right value can be found by ear
+  const running = playing.filter(n => !n.held);
+  playing = playing.filter(n => n.held);
+  for (const n of running) {
+    const {buffer, gain, lead, until} = n;
+    try { n.stop(); } catch {}
+    n.disconnect(); startBuffer(buffer, gain, v.currentTime + lead, until);
+  }
 }
 /* Safety net: if the picture stops to wait for data, the sound and the microphone wait with it.
    Otherwise the music and voices run on while the picture and subtitles freeze, and a take
@@ -1785,6 +1814,13 @@ $('#saveBtn').onclick=async()=>{
 };
 $('#volVoice').oninput = e => voiceGain.gain.value = +e.target.value;
 $('#volBg').oninput = e => bgGain.gain.value = +e.target.value;
+document.querySelectorAll('.hear-lag').forEach(box => {
+  box.innerHTML = `<span>سماعة بلوتوث؟ قدّم الصوت</span>
+    <button class="key flat" data-d="-40" aria-label="قلّل تقديم الصوت"><svg class="i"><use href="#i-minus"/></svg></button>
+    <bdi dir="ltr"><span class="hearLagVal">${hearLag}</span> ms</bdi>
+    <button class="key flat" data-d="40" aria-label="زد تقديم الصوت"><svg class="i"><use href="#i-plus"/></svg></button>`;
+  box.querySelectorAll('button').forEach(b => b.onclick = () => setHearLag(hearLag + +b.dataset.d));
+});
 
 /* voting */
 let votes = {};

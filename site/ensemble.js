@@ -4,16 +4,28 @@ E.soloCharacter='';
 const charactersOf=c=>c.characters?.length?c.characters:Array.from({length:c.voices||1},(_,i)=>({id:'c'+(i+1),name:'شخصية '+(i+1)}));
 const lineCharacters=l=>Array.isArray(l.characters)?l.characters:l.character?[l.character]:[];
 function activeCharacters(){return RS.role==='seat'?E.seatCharacters:E.session?.plan[E.session.index]?.characters||null;}
+const validLines=clip=>(clip.timed||[]).filter(l=>Number.isFinite(l.start)&&Number.isFinite(l.end)&&l.end>l.start);
+function isAssigned(clip,line,ids){
+  const chars=charactersOf(clip);
+  return !ids||(lineCharacters(line).length?lineCharacters(line):chars.length===1?[chars[0].id]:[]).some(id=>ids.includes(id));
+}
 function assignedIntervals(clip,ids,duration){
-  const chars=charactersOf(clip),lines=(clip.timed||[]).filter(l=>Number.isFinite(l.start)&&Number.isFinite(l.end)&&l.end>l.start);
-  if(lines.length)return lines.filter(l=>!ids||(lineCharacters(l).length?lineCharacters(l):chars.length===1?[chars[0].id]:[]).some(id=>ids.includes(id))).map(l=>[l.start,l.end]);
+  const lines=validLines(clip);
+  if(lines.length)return lines.filter(l=>isAssigned(clip,l,ids)).map(l=>[l.start,l.end]);
   return ids?[]:[[0,duration]];
+}
+/* Where the original voices come out for the people dubbing: their own lines, except where a character
+   nobody is dubbing is talking, so that character's lines are always heard whole. The voices in the clip
+   can't be pulled apart, so the original of the dubbed character stays under those few moments too. */
+function removedIntervals(clip,ids,duration){
+  const kept=validLines(clip).filter(l=>!isAssigned(clip,l,ids));
+  return assignedIntervals(clip,ids,duration).flatMap(range=>kept.reduce((parts,l)=>parts.flatMap(([a,b])=>[[a,Math.min(b,l.start)],[Math.max(a,l.end),b]].filter(([x,y])=>y>x)),[range]));
 }
 async function recordingGuide(clip,ids){
   initAudio();
   const original=await getBuffer('original:'+clip.video,await clipFile(clip).blob);
   const music=clip.bg?await getBuffer(clip.bg,url(clip.bg)):null;
-  const ranges=assignedIntervals(clip,ids,original.duration);
+  const ranges=removedIntervals(clip,ids,original.duration);
   const result=ctx.createBuffer(original.numberOfChannels,original.length,original.sampleRate);
   for(let ch=0;ch<result.numberOfChannels;ch++){
     const dst=result.getChannelData(ch),src=original.getChannelData(ch);dst.set(src);
