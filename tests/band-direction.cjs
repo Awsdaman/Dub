@@ -29,7 +29,7 @@ const pass=n=>console.log('PASS '+n);
    document.querySelector('#bandProbe')?.remove();
    const cv=document.createElement('canvas');cv.id='bandProbe';cv.style.cssText='display:block;width:1200px;height:140px;position:fixed;top:0;left:0;z-index:99';document.body.append(cv);
    drawBand(cv,{...band,dur:60,clock:()=>ln.start,countdown:false,tape:null,punchAt:null});
-   const g=cv.getContext('2d'),W=cv.width,H=cv.height,scale=W/1200,d=g.getImageData(0,0,W,H).data,y0=Math.round(H*.3),y1=Math.round(H*.7);
+   const g=cv.getContext('2d'),W=cv.width,H=cv.height,scale=W/1200,d=g.getImageData(0,0,W,H).data,y0=Math.round(H*.18),y1=Math.round(H*.82);
    let red=[],ink=[];
    for(let x=0;x<W;x++){let r=0,k=0;for(let y=y0;y<y1;y++){const i=(y*W+x)*4,R=d[i],G=d[i+1],B=d[i+2];if(R>220&&G<80&&B<80)r++;else if(R<70&&G<70&&B<70)k++;}if(r>(y1-y0)*.8)red.push(x);if(k)ink.push(x);}
    const bar=(red[0]+red[red.length-1])/2/scale,xs=ink.map(x=>x/scale);

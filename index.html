@@ -204,7 +204,7 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
 /* ---------- booth (watch/record/result) ---------- */
 .booth{display:grid;grid-template-columns:minmax(0,1fr);gap:0}
 .monrow{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(24rem,1fr);gap:clamp(20px,2.4vw,44px);align-items:center}
-.monitor{position:relative;background:#050505;border-radius:.9rem;padding:.7rem;box-shadow:inset 0 0 0 1px #2c2a27,0 22px 50px rgba(0,0,0,.7);margin-inline:auto;width:100%;max-width:calc(54vh * 16 / 9)}
+.monitor{position:relative;background:#050505;border-radius:.9rem;padding:.7rem;box-shadow:inset 0 0 0 1px #2c2a27,0 22px 50px rgba(0,0,0,.7);margin-inline:auto;width:100%;max-width:calc((54vh - var(--band-extra,0px)) * 16 / 9)}
 .monitor .scr{position:relative;aspect-ratio:16/9;background:#000;border-radius:.3rem;overflow:hidden}
 .monitor video{width:100%;height:100%;object-fit:contain;display:block}
 .monitor .tc{position:absolute;top:.8rem;left:.8rem;direction:ltr;background:rgba(0,0,0,.78);color:#fff;font:600 1rem var(--ui);font-variant-numeric:tabular-nums;padding:.1rem .5rem;letter-spacing:.04em}
@@ -236,7 +236,7 @@ svg.i{width:1.4em;height:1.4em;fill:none;stroke:currentColor;stroke-width:2;stro
 .console .tapes{justify-content:center}
 .lines{display:none}
 .side{display:flex;flex-direction:column;align-items:center;gap:1.1rem}
-.side .vu{width:17rem}
+.side .vu{width:calc(17rem - var(--band-extra,0px) * .5)}
 
 /* faders */
 .mixer{display:flex;gap:1.6rem;align-items:flex-end;justify-content:center;background:linear-gradient(180deg,var(--metal-hi),var(--metal-lo));padding:1rem 1.6rem;border-radius:1rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 24px rgba(0,0,0,.5)}
@@ -1121,16 +1121,27 @@ function setupBand(clip) {
     band.texts = parseLines(clip.lines, band.dur || 20, band.blocks);
     if (!band.blocks.length) band.blocks = band.texts.map(t => [t.start, t.end]);
   }
+  band.chars = clip.timed?.length ? charactersOf(clip) : [];
   band.ltr = scriptIsLtr(band.texts.map(l => l.text).join(' ') || clip.title); // no script yet: go by the clip's name
   $('#bandcap').textContent = band.blocks.length ? '' : 'ما فيه توقيت للكلام في هذا الكليب، تابعوا الشاشة';
 }
 function roundRect(g, x, y, w, h, r) { g.beginPath(); g.roundRect(x, y, w, h, r); }
 function drawBand(cv, B) {
   const visibleTime=B.clock();
-  const sortedLines = [...B.texts].filter(l=>l.start<=visibleTime+7&&l.end>=visibleTime-4).sort((a,b)=>a.start-b.start), laneEnds=[], lineLanes=new Map();
-  for(const line of sortedLines){let lane=laneEnds.findIndex(end=>end<=line.start);if(lane<0)lane=laneEnds.length;laneEnds[lane]=line.end;lineLanes.set(line,lane);}
-  const laneCount=Math.max(1,laneEnds.length);
-  cv.style.height=laneCount>1?`${Math.max(140, laneCount*72+40)}px`:'';
+  const sortedLines = [...B.texts].filter(l=>l.start<=visibleTime+7&&l.end>=visibleTime-4).sort((a,b)=>a.start-b.start);
+  // every character keeps one row for the whole clip, in the clip's character order; a line shared
+  // by two characters shows on both rows, and lines without a character get a row of their own
+  const chars = B.chars || [], knownRow = id => chars.findIndex(c => c.id === id);
+  const looseRow = chars.length > 1 && B.texts.some(l => !lineCharacters(l).some(id => knownRow(id) >= 0));
+  const rowsOf = l => { const rows = lineCharacters(l).map(knownRow).filter(i => i >= 0); return rows.length ? rows : [chars.length > 1 ? chars.length : 0]; };
+  const laneCount = Math.max(1, chars.length + (looseRow ? 1 : 0));
+  const tallBand = Math.round(Math.max(140, Math.min(340, innerHeight * .34, laneCount * 72 + 40)));
+  cv.style.height = laneCount > 1 ? `${tallBand}px` : '';
+  // with many characters the picture gives way, so the band and the picture both stay on screen
+  if (cv === bandCanvas) {
+    const extra = laneCount > 2 ? Math.max(0, tallBand - 176) : 0;
+    if (extra !== B.extra) { B.extra = extra; document.body.style.setProperty('--band-extra', `${extra}px`); }
+  }
   const W = cv.clientWidth, H = cv.clientHeight, dpr = devicePixelRatio || 1;
   if (!W) return;
   if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) {
@@ -1141,7 +1152,7 @@ function drawBand(cv, B) {
   // ahead = the side of the band the script comes from: the left for Arabic, the right for English
   const ltr = !!B.ltr, ahead = ltr ? 1 : -1;
   const pps = W / 7.5, barX = ltr ? W * .3 : W * .7, X = s => barX + ahead * (s - t) * pps;
-  const lane = H * .17, top = lane, bot = H - lane, mid = H / 2;
+  const lane = Math.min(H * .17, 32), top = lane, bot = H - lane, mid = H / 2;
 
   g.fillStyle = '#0d0c0b'; g.fillRect(0, 0, W, H);
   g.fillStyle = '#ece8dc'; g.fillRect(0, 2, W, H - 4);
@@ -1154,11 +1165,11 @@ function drawBand(cv, B) {
   }
   g.fillStyle = '#cfc8b6'; g.fillRect(0, top, W, 1.5); g.fillRect(0, bot - 1.5, W, 1.5);
   // second marks
-  g.fillStyle = '#a99f88'; g.font = `500 ${Math.max(10, H * .075)}px Thmanyah Sans`; g.textAlign = 'center'; g.direction = 'ltr';
+  g.fillStyle = '#a99f88'; g.font = `500 ${Math.max(10, Math.min(H * .075, 14))}px Thmanyah Sans`; g.textAlign = 'center'; g.direction = 'ltr';
   for (let s = Math.floor(t - 3); s < t + 7; s++) {
     if (s < 0 || (B.dur && s > B.dur)) continue;
-    const x = X(s); g.fillRect(x - .75, top, 1.5, H * .08);
-    g.fillText(String(s), x, top + H * .17);
+    const x = X(s); g.fillRect(x - .75, top, 1.5, Math.min(H * .08, 15));
+    g.fillText(String(s), x, top + Math.min(H * .17, 30));
   }
   // past the clip end: hatch
   if (B.dur) {
@@ -1172,14 +1183,16 @@ function drawBand(cv, B) {
   }
   // the original speech, in wax pencil
   const rowHeight=(bot-top)/laneCount;
+  g.fillStyle = '#d9d2c0';
+  for (let row = 1; row < laneCount; row++) g.fillRect(0, top + row * rowHeight, W, 1);
   const bh = rowHeight * .5, wax = B.live ? 'rgba(255,42,31,' : 'rgba(245,197,24,';
   for (const [a, b] of B.blocks) {
     const left = Math.min(X(a), X(b)), right = Math.max(X(a), X(b));
     if (right < 0 || left > W) continue;
     const now = t >= a && t <= b;
     g.fillStyle = wax + (now ? '.95)' : t > b ? '.28)' : '.6)');
-    const match=sortedLines.find(l=>l.start===a&&l.end===b), row=lineLanes.get(match)||0;
-    roundRect(g, left, top+rowHeight*(row+.5)-bh/2, Math.max(4, right-left), bh, bh/2); g.fill();
+    const matches = sortedLines.filter(l => l.start === a && l.end === b);
+    for (const row of matches.length ? new Set(matches.flatMap(rowsOf)) : [0]) { roundRect(g, left, top+rowHeight*(row+.5)-bh/2, Math.max(4, right-left), bh, bh/2); g.fill(); }
   }
   // what this take has on tape so far: earlier passes in green, the pass being recorded in red
   if (B.tape) for (const [a, b, live] of B.tape()) {
@@ -1197,12 +1210,12 @@ function drawBand(cv, B) {
   // the lines, written in their reading direction so the first word reaches the bar first
   g.direction = ltr ? 'ltr' : 'rtl'; g.textAlign = ltr ? 'left' : 'right'; g.textBaseline = 'middle';
   const texts = sortedLines;
-  texts.forEach((ln, i) => {
+  texts.forEach((ln, i) => { for (const row of rowsOf(ln)) {
     const x1 = X(ln.start);
-    const row=lineLanes.get(ln), next=texts.slice(i+1).find(l=>lineLanes.get(l)===row);
+    const next=texts.slice(i+1).find(l=>rowsOf(l).includes(row));
     const room = ((next ? next.start : ln.start + 12) - ln.start) * pps - 10;
     const rowTop=top+row*rowHeight, rowMid=rowTop+rowHeight*.55;
-    if (ltr ? x1 > W + 20 || x1 + room < -40 : x1 < -20 || x1 - room > W + 40) return;
+    if (ltr ? x1 > W + 20 || x1 + room < -40 : x1 < -20 || x1 - room > W + 40) continue;
     let fs = rowHeight * .45;
     g.font = `700 ${fs}px Marhey`;
     const shown = ltr ? ltrLine(ln.text) : ln.text, tw = g.measureText(shown).width;
@@ -1210,7 +1223,7 @@ function drawBand(cv, B) {
     g.save();
     const clipW = Math.max(room, 30) + 6;
     g.beginPath(); g.rect(ltr ? x1 - 6 : x1 + 6 - clipW, rowTop, clipW, rowHeight); g.clip();
-    const assigned=!B.assigned||(ln.characters||[ln.character]).some(id=>B.assigned.includes(id));
+    const assigned=!B.assigned||(chars.length>1&&chars[row]?B.assigned.includes(chars[row].id):lineCharacters(ln).some(id=>B.assigned.includes(id)));
     g.fillStyle = t > ln.end ? 'rgba(27,24,20,.35)' : assigned ? '#1b1814' : '#776f60';
     g.fillText(shown, x1 + ahead * 4, rowMid);
     g.restore();
@@ -1218,7 +1231,17 @@ function drawBand(cv, B) {
       g.strokeStyle = '#ff2a1f'; g.lineWidth = 3;
       roundRect(g, Math.min(X(ln.start), X(ln.end)) - 4, rowTop + 3, Math.max(8, (ln.end - ln.start) * pps + 8), rowHeight - 6, 6); g.stroke();
     }
-  });
+  } });
+  // each row's name, at the edge the script has already passed
+  if (chars.length > 1) {
+    const fs = Math.max(11, rowHeight * .24), nameX = ltr ? 8 : W - 8;
+    g.font = `700 ${fs}px Thmanyah Sans`;
+    chars.forEach((c, row) => {
+      const y = top + row * rowHeight + fs * .85, tw = g.measureText(c.name).width;
+      g.fillStyle = 'rgba(236,232,220,.9)'; g.fillRect(ltr ? nameX - 4 : nameX - tw - 4, y - fs * .7, tw + 8, fs * 1.4);
+      g.fillStyle = B.assigned?.includes(c.id) ? '#c8201a' : '#6f6656'; g.fillText(c.name, nameX, y);
+    });
+  }
   // countdown wipes before the take
   if (B.countdown) {
     g.direction = 'ltr'; g.textAlign = 'center';
@@ -1643,6 +1666,7 @@ async function captureTake(clip, {hearBg = false, status = () => {}, base = null
     await mic();
     if (!await enterBooth(clip)) throw new Error('ما قدرنا نشغّل الفيديو');
     controls('c-record'); setWho(S.dubbers); v.muted = true;
+    setTimeout(() => bandCanvas.scrollIntoView({block: 'nearest'}), 100);
     band.tape = tapeRanges;
     const bg = hearBg ? await guide() : null;
     cancelled();
@@ -2132,8 +2156,9 @@ $('#setOut').onclick = () => { ed.trim.out = Math.max(ev.currentTime, ed.trim.in
     $('#etc').textContent = `00:${pad2(Math.floor(t / 60))}:${pad2(Math.floor(t % 60))}:${pad2(Math.floor((t % 1) * 25))}`;
     if (!ev.paused && t >= ed.trim.out) { ev.pause(); if (ed.holding) holdEnd(); }
     const live = ed.lines.filter(l => l.start != null && l.text.trim())
-      .map(l => ({start: l.start, end: l.end ?? (l === ed.sel && ed.holding ? Math.max(l.start + .1, t) : l.start + 1.5), text: l.text, ref: l}));
+      .map(l => ({start: l.start, end: l.end ?? (l === ed.sel && ed.holding ? Math.max(l.start + .1, t) : l.start + 1.5), text: l.text, character: l.character, characters: l.characters, ref: l}));
     ed.band.texts = live;
+    ed.band.chars = ed.characters || [];
     ed.band.ltr = scriptIsLtr(ed.lines.map(l => l.text).join(' ').trim() || ed.clip.title);
     ed.band.blocks = live.map(l => [l.start, l.end]);
     ed.band.sel = live.find(l => l.ref === ed.sel) || null;
