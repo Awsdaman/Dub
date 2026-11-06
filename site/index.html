@@ -1074,6 +1074,13 @@ function parseLines(raw, dur, speech) {
     return {start: a, end: Math.max(a + .5, b), text};
   }).concat(timed);
 }
+/* a script written mostly in Latin letters runs left to right, everything else stays right to left */
+function scriptIsLtr(text) {
+  const count = re => (String(text).match(re) || []).length;
+  return count(/[A-Za-z]/g) > count(/[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/g);
+}
+/* the editing room is right to left, so a typed "hey!" is often stored as "!hey": put the mark back at the end */
+const ltrLine = text => text.replace(/^\s*([!?.,؟،]+)\s*(.+)$/, '$2$1');
 function setupBand(clip) {
   band.dur = v.duration || 0;
   if (clip.timed && clip.timed.length) {
@@ -1085,6 +1092,7 @@ function setupBand(clip) {
     band.texts = parseLines(clip.lines, band.dur || 20, band.blocks);
     if (!band.blocks.length) band.blocks = band.texts.map(t => [t.start, t.end]);
   }
+  band.ltr = scriptIsLtr(band.texts.map(l => l.text).join(' ') || clip.title); // no script yet: go by the clip's name
   $('#bandcap').textContent = band.blocks.length ? '' : 'ما فيه توقيت للكلام في هذا الكليب، تابعوا الشاشة';
 }
 function roundRect(g, x, y, w, h, r) { g.beginPath(); g.roundRect(x, y, w, h, r); }
@@ -1101,13 +1109,15 @@ function drawBand(cv, B) {
   }
   const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
   const t = B.clock();
-  const pps = W / 7.5, barX = W * .7, X = s => barX - (s - t) * pps;
+  // ahead = the side of the band the script comes from: the left for Arabic, the right for English
+  const ltr = !!B.ltr, ahead = ltr ? 1 : -1;
+  const pps = W / 7.5, barX = ltr ? W * .3 : W * .7, X = s => barX + ahead * (s - t) * pps;
   const lane = H * .17, top = lane, bot = H - lane, mid = H / 2;
 
   g.fillStyle = '#0d0c0b'; g.fillRect(0, 0, W, H);
   g.fillStyle = '#ece8dc'; g.fillRect(0, 2, W, H - 4);
   // sprocket holes travel with the band
-  const pitch = 34, ph = ((t * pps) % pitch + pitch) % pitch;
+  const pitch = 34, ph = ((-ahead * t * pps) % pitch + pitch) % pitch;
   g.fillStyle = '#151413';
   for (let x = ph - pitch; x < W + pitch; x += pitch) {
     roundRect(g, x, lane * .28, 17, lane * .44, 3); g.fill();
@@ -1123,11 +1133,11 @@ function drawBand(cv, B) {
   }
   // past the clip end: hatch
   if (B.dur) {
-    const xe = X(B.dur);
-    if (xe > 0) {
-      g.save(); g.beginPath(); g.rect(0, top, Math.min(W, xe), bot - top); g.clip();
+    const xe = X(B.dur), hatchL = ltr ? Math.max(0, xe) : 0, hatchR = ltr ? W : Math.min(W, xe);
+    if (hatchR > hatchL) {
+      g.save(); g.beginPath(); g.rect(hatchL, top, hatchR - hatchL, bot - top); g.clip();
       g.strokeStyle = '#d6cfbd'; g.lineWidth = 6;
-      for (let x = -H; x < xe + H; x += 18) { g.beginPath(); g.moveTo(x, bot); g.lineTo(x + (bot - top), top); g.stroke(); }
+      for (let x = -H; x < hatchR + H; x += 18) { g.beginPath(); g.moveTo(x, bot); g.lineTo(x + (bot - top), top); g.stroke(); }
       g.restore();
     }
   }
@@ -1135,47 +1145,49 @@ function drawBand(cv, B) {
   const rowHeight=(bot-top)/laneCount;
   const bh = rowHeight * .5, wax = B.live ? 'rgba(255,42,31,' : 'rgba(245,197,24,';
   for (const [a, b] of B.blocks) {
-    const x1 = X(a), x2 = X(b);
-    if (x1 < 0 || x2 > W) continue;
+    const left = Math.min(X(a), X(b)), right = Math.max(X(a), X(b));
+    if (right < 0 || left > W) continue;
     const now = t >= a && t <= b;
     g.fillStyle = wax + (now ? '.95)' : t > b ? '.28)' : '.6)');
     const match=sortedLines.find(l=>l.start===a&&l.end===b), row=lineLanes.get(match)||0;
-    roundRect(g, x2, top+rowHeight*(row+.5)-bh/2, Math.max(4, x1-x2), bh, bh/2); g.fill();
+    roundRect(g, left, top+rowHeight*(row+.5)-bh/2, Math.max(4, right-left), bh, bh/2); g.fill();
   }
   // what this take has on tape so far: earlier passes in green, the pass being recorded in red
   if (B.tape) for (const [a, b, live] of B.tape()) {
-    const x1 = Math.min(W, X(a)), x2 = Math.max(0, X(Math.min(b, B.dur || b)));
-    if (x1 <= x2) continue;
+    const xa = X(a), xb = X(Math.min(b, B.dur || b));
+    const left = Math.max(0, Math.min(xa, xb)), right = Math.min(W, Math.max(xa, xb));
+    if (right <= left) continue;
     g.fillStyle = live ? '#ff2a1f' : '#4f9e62';
-    roundRect(g, x2, bot - 9, x1 - x2, 6, 3); g.fill();
+    roundRect(g, left, bot - 9, right - left, 6, 3); g.fill();
   }
   // where the next pass starts recording
   if (B.punchAt != null) {
     const x = X(B.punchAt);
     g.fillStyle = '#ff2a1f'; g.fillRect(x - 2, top, 4, bot - top);
   }
-  // the lines, written right to left so the first word reaches the bar first
-  g.direction = 'rtl'; g.textAlign = 'right'; g.textBaseline = 'middle';
+  // the lines, written in their reading direction so the first word reaches the bar first
+  g.direction = ltr ? 'ltr' : 'rtl'; g.textAlign = ltr ? 'left' : 'right'; g.textBaseline = 'middle';
   const texts = sortedLines;
   texts.forEach((ln, i) => {
     const x1 = X(ln.start);
     const row=lineLanes.get(ln), next=texts.slice(i+1).find(l=>lineLanes.get(l)===row);
     const room = ((next ? next.start : ln.start + 12) - ln.start) * pps - 10;
     const rowTop=top+row*rowHeight, rowMid=rowTop+rowHeight*.55;
-    if (x1 < -20 || x1 - room > W + 40) return;
+    if (ltr ? x1 > W + 20 || x1 + room < -40 : x1 < -20 || x1 - room > W + 40) return;
     let fs = rowHeight * .45;
     g.font = `700 ${fs}px Marhey`;
-    const tw = g.measureText(ln.text).width;
+    const shown = ltr ? ltrLine(ln.text) : ln.text, tw = g.measureText(shown).width;
     if (tw > room && room > 0) { fs = Math.max(rowHeight * .26, fs * room / tw); g.font = `700 ${fs}px Marhey`; }
     g.save();
-    g.beginPath(); g.rect(x1 - Math.max(room, 30), rowTop, Math.max(room, 30) + 6, rowHeight); g.clip();
+    const clipW = Math.max(room, 30) + 6;
+    g.beginPath(); g.rect(ltr ? x1 - 6 : x1 + 6 - clipW, rowTop, clipW, rowHeight); g.clip();
     const assigned=!B.assigned||(ln.characters||[ln.character]).some(id=>B.assigned.includes(id));
     g.fillStyle = t > ln.end ? 'rgba(27,24,20,.35)' : assigned ? '#1b1814' : '#776f60';
-    g.fillText(ln.text, x1 - 4, rowMid);
+    g.fillText(shown, x1 + ahead * 4, rowMid);
     g.restore();
     if (B.sel === ln) {
       g.strokeStyle = '#ff2a1f'; g.lineWidth = 3;
-      roundRect(g, X(ln.end) - 4, rowTop + 3, Math.max(8, (ln.end - ln.start) * pps + 8), rowHeight - 6, 6); g.stroke();
+      roundRect(g, Math.min(X(ln.start), X(ln.end)) - 4, rowTop + 3, Math.max(8, (ln.end - ln.start) * pps + 8), rowHeight - 6, 6); g.stroke();
     }
   });
   // countdown wipes before the take
@@ -1184,7 +1196,7 @@ function drawBand(cv, B) {
     for (const k of [3, 2, 1]) {
       const x = X(-k);
       g.fillStyle = '#1b1814'; g.fillRect(x - 5, top, 10, bot - top);
-      g.font = `900 ${H * .2}px Thmanyah Sans`; g.fillText(['', '١', '٢', '٣'][k], x - 26, top + H * .16);
+      g.font = `900 ${H * .2}px Thmanyah Sans`; g.fillText(['', '١', '٢', '٣'][k], x + ahead * 26, top + H * .16);
     }
     const x0 = X(0); g.fillStyle = '#2e8b57'; g.fillRect(x0 - 3, top, 6, bot - top);
   }
@@ -1218,7 +1230,7 @@ bandCanvas.addEventListener('pointermove', e => {
   if (!bandDrag) return;
   const dx = e.clientX - bandDrag.x;
   if (Math.abs(dx) > 3) bandDrag.moved = true;
-  v.currentTime = Math.max(0, Math.min(v.duration - .05, bandDrag.t + dx / (bandCanvas.clientWidth / 7.5)));
+  v.currentTime = Math.max(0, Math.min(v.duration - .05, bandDrag.t + (band.ltr ? -dx : dx) / (bandCanvas.clientWidth / 7.5)));
 });
 function endBandDrag() {
   const d = bandDrag; bandDrag = null;
@@ -2086,6 +2098,7 @@ $('#setOut').onclick = () => { ed.trim.out = Math.max(ev.currentTime, ed.trim.in
     const live = ed.lines.filter(l => l.start != null && l.text.trim())
       .map(l => ({start: l.start, end: l.end ?? (l === ed.sel && ed.holding ? Math.max(l.start + .1, t) : l.start + 1.5), text: l.text, ref: l}));
     ed.band.texts = live;
+    ed.band.ltr = scriptIsLtr(ed.lines.map(l => l.text).join(' ').trim() || ed.clip.title);
     ed.band.blocks = live.map(l => [l.start, l.end]);
     ed.band.sel = live.find(l => l.ref === ed.sel) || null;
   }

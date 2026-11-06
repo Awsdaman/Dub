@@ -181,64 +181,295 @@
  {
   "id": "Anxiety",
   "title": "Anxiety",
-  "voices": 1,
+  "voices": 6,
   "characters": [
    {
     "id": "c1",
-    "name": "شخصية 1"
+    "name": "Joy"
+   },
+   {
+    "id": "c-e839f338-da36-4af7-9380-a229485e0f3c",
+    "name": "Fear"
+   },
+   {
+    "id": "c-5b03bf3f-bd7b-44f6-b0bc-ff530e5fc4a8",
+    "name": "Anger"
+   },
+   {
+    "id": "c-0e4c78f5-49fe-47f3-9e06-ae231bb51b51",
+    "name": "Sadness"
+   },
+   {
+    "id": "c-d7d36f32-a390-4564-8e19-c63a5271545d",
+    "name": "Disgust"
+   },
+   {
+    "id": "c-8fa3f566-9eee-4ca7-adef-c1676da4205a",
+    "name": "Anxiety"
    }
   ],
   "video": "clips/Anxiety.mp4",
   "bg": "processed/Anxiety.bg.mp3",
   "thumb": "processed/Anxiety.jpg",
-  "lines": "",
+  "lines": "It's minisota sweetie\nno no no no we can not correct val orteez\norange? who made the console orange\ndo i look orange?g\ni didn't touch it\norange is just not my color\nnot me\nhello everybody\naaaaaaaaaaaaah\noh my gosh i'm just such a huge fan of yours and now\nhere i am meeting you face to face (aaaah)\nok how can i help?p",
   "speech": [
    [
-    0.0,
-    5.68
+    0.02,
+    5.66
    ],
    [
     6.22,
-    6.76
+    6.74
    ],
    [
-    7.26,
-    11.28
+    7.24,
+    11.26
    ],
    [
-    11.82,
-    16.96
+    11.8,
+    16.94
    ],
    [
-    17.94,
-    23.1
+    17.92,
+    23.08
    ],
    [
-    23.5,
-    25.96
+    23.48,
+    25.94
    ],
    [
-    26.38,
-    32.02
-   ],
-   [
-    32.42,
-    35.1
-   ],
-   [
-    35.48,
-    39.34
-   ],
-   [
-    39.84,
-    49.96
+    26.36,
+    27.28
    ]
   ],
-  "timed": [],
+  "timed": [
+   {
+    "start": 1.76,
+    "end": 3.45,
+    "text": "It's minisota sweetie",
+    "character": "c-5b03bf3f-bd7b-44f6-b0bc-ff530e5fc4a8",
+    "characters": [
+     "c-5b03bf3f-bd7b-44f6-b0bc-ff530e5fc4a8"
+    ]
+   },
+   {
+    "start": 2.84,
+    "end": 5.71,
+    "text": "no no no no we can not correct val orteez",
+    "character": "c-d7d36f32-a390-4564-8e19-c63a5271545d",
+    "characters": [
+     "c-d7d36f32-a390-4564-8e19-c63a5271545d"
+    ]
+   },
+   {
+    "start": 11.71,
+    "end": 14.09,
+    "text": "orange? who made the console orange",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 13.9,
+    "end": 14.93,
+    "text": "do i look orange?g",
+    "character": "c-5b03bf3f-bd7b-44f6-b0bc-ff530e5fc4a8",
+    "characters": [
+     "c-5b03bf3f-bd7b-44f6-b0bc-ff530e5fc4a8"
+    ]
+   },
+   {
+    "start": 14.94,
+    "end": 15.77,
+    "text": "i didn't touch it",
+    "character": "c-e839f338-da36-4af7-9380-a229485e0f3c",
+    "characters": [
+     "c-e839f338-da36-4af7-9380-a229485e0f3c"
+    ]
+   },
+   {
+    "start": 15.47,
+    "end": 16.4,
+    "text": "orange is just not my color",
+    "character": "c-d7d36f32-a390-4564-8e19-c63a5271545d",
+    "characters": [
+     "c-d7d36f32-a390-4564-8e19-c63a5271545d"
+    ]
+   },
+   {
+    "start": 16.2,
+    "end": 17.18,
+    "text": "not me",
+    "character": "c-0e4c78f5-49fe-47f3-9e06-ae231bb51b51",
+    "characters": [
+     "c-0e4c78f5-49fe-47f3-9e06-ae231bb51b51"
+    ]
+   },
+   {
+    "start": 17.75,
+    "end": 19.31,
+    "text": "hello everybody",
+    "character": "c-8fa3f566-9eee-4ca7-adef-c1676da4205a",
+    "characters": [
+     "c-8fa3f566-9eee-4ca7-adef-c1676da4205a"
+    ]
+   },
+   {
+    "start": 19.31,
+    "end": 19.99,
+    "text": "aaaaaaaaaaaaah",
+    "character": "c-5b03bf3f-bd7b-44f6-b0bc-ff530e5fc4a8",
+    "characters": [
+     "c-5b03bf3f-bd7b-44f6-b0bc-ff530e5fc4a8",
+     "c-e839f338-da36-4af7-9380-a229485e0f3c"
+    ]
+   },
+   {
+    "start": 19.99,
+    "end": 23.31,
+    "text": "oh my gosh i'm just such a huge fan of yours and now",
+    "character": "c-8fa3f566-9eee-4ca7-adef-c1676da4205a",
+    "characters": [
+     "c-8fa3f566-9eee-4ca7-adef-c1676da4205a"
+    ]
+   },
+   {
+    "start": 23.31,
+    "end": 26.36,
+    "text": "here i am meeting you face to face (aaaah)",
+    "character": "c-8fa3f566-9eee-4ca7-adef-c1676da4205a",
+    "characters": [
+     "c-8fa3f566-9eee-4ca7-adef-c1676da4205a"
+    ]
+   },
+   {
+    "start": 26.37,
+    "end": 27.54,
+    "text": "ok how can i help?p",
+    "character": "c-8fa3f566-9eee-4ca7-adef-c1676da4205a",
+    "characters": [
+     "c-8fa3f566-9eee-4ca7-adef-c1676da4205a"
+    ]
+   }
+  ],
   "edit": {
-   "source": "clips/Anxiety.mp4",
-   "trim": null,
-   "lines": null
+   "source": "originals/Anxiety.mp4",
+   "trim": {
+    "in": 0.0,
+    "out": 27.65
+   },
+   "lines": [
+    {
+     "text": "It's minisota sweetie",
+     "start": 1.758,
+     "end": 3.448,
+     "character": "c-5b03bf3f-bd7b-44f6-b0bc-ff530e5fc4a8",
+     "characters": [
+      "c-5b03bf3f-bd7b-44f6-b0bc-ff530e5fc4a8"
+     ]
+    },
+    {
+     "text": "no no no no we can not correct val orteez",
+     "start": 2.841,
+     "end": 5.71,
+     "character": "c-d7d36f32-a390-4564-8e19-c63a5271545d",
+     "characters": [
+      "c-d7d36f32-a390-4564-8e19-c63a5271545d"
+     ]
+    },
+    {
+     "text": "orange? who made the console orange",
+     "start": 11.712,
+     "end": 14.089,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "do i look orange?g",
+     "start": 13.901,
+     "end": 14.931,
+     "character": "c-5b03bf3f-bd7b-44f6-b0bc-ff530e5fc4a8",
+     "characters": [
+      "c-5b03bf3f-bd7b-44f6-b0bc-ff530e5fc4a8"
+     ]
+    },
+    {
+     "text": "i didn't touch it",
+     "start": 14.936,
+     "end": 15.772,
+     "character": "c-e839f338-da36-4af7-9380-a229485e0f3c",
+     "characters": [
+      "c-e839f338-da36-4af7-9380-a229485e0f3c"
+     ]
+    },
+    {
+     "text": "orange is just not my color",
+     "start": 15.471,
+     "end": 16.399,
+     "character": "c-d7d36f32-a390-4564-8e19-c63a5271545d",
+     "characters": [
+      "c-d7d36f32-a390-4564-8e19-c63a5271545d"
+     ]
+    },
+    {
+     "text": "not me",
+     "start": 16.197,
+     "end": 17.177,
+     "character": "c-0e4c78f5-49fe-47f3-9e06-ae231bb51b51",
+     "characters": [
+      "c-0e4c78f5-49fe-47f3-9e06-ae231bb51b51"
+     ]
+    },
+    {
+     "text": "hello everybody",
+     "start": 17.752,
+     "end": 19.308,
+     "character": "c-8fa3f566-9eee-4ca7-adef-c1676da4205a",
+     "characters": [
+      "c-8fa3f566-9eee-4ca7-adef-c1676da4205a"
+     ]
+    },
+    {
+     "text": "aaaaaaaaaaaaah",
+     "start": 19.308,
+     "end": 19.992,
+     "character": "c-5b03bf3f-bd7b-44f6-b0bc-ff530e5fc4a8",
+     "characters": [
+      "c-5b03bf3f-bd7b-44f6-b0bc-ff530e5fc4a8",
+      "c-e839f338-da36-4af7-9380-a229485e0f3c"
+     ]
+    },
+    {
+     "text": "oh my gosh i'm just such a huge fan of yours and now",
+     "start": 19.992,
+     "end": 23.312,
+     "character": "c-8fa3f566-9eee-4ca7-adef-c1676da4205a",
+     "characters": [
+      "c-8fa3f566-9eee-4ca7-adef-c1676da4205a"
+     ]
+    },
+    {
+     "text": "here i am meeting you face to face (aaaah)",
+     "start": 23.312,
+     "end": 26.362,
+     "character": "c-8fa3f566-9eee-4ca7-adef-c1676da4205a",
+     "characters": [
+      "c-8fa3f566-9eee-4ca7-adef-c1676da4205a"
+     ]
+    },
+    {
+     "text": "ok how can i help?p",
+     "start": 26.37,
+     "end": 27.536,
+     "character": "c-8fa3f566-9eee-4ca7-adef-c1676da4205a",
+     "characters": [
+      "c-8fa3f566-9eee-4ca7-adef-c1676da4205a"
+     ]
+    }
+   ]
   }
  },
  {
@@ -1665,17 +1896,21 @@
  {
   "id": "اوهانا يعني العيلة",
   "title": "اوهانا يعني العيلة",
-  "voices": 1,
+  "voices": 2,
   "characters": [
    {
     "id": "c1",
-    "name": "شخصية 1"
+    "name": "ليلو"
+   },
+   {
+    "id": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+    "name": "الاخت"
    }
   ],
   "video": "clips/اوهانا يعني العيلة.mp4",
   "bg": "processed/اوهانا يعني العيلة.bg.mp3",
   "thumb": "processed/اوهانا يعني العيلة.jpg",
-  "lines": "",
+  "lines": "ايه؟ بتعمل ايه؟\nبس بقا يا ستيتش\nهيييييييي\n(صوت معافرة)\nبصي شكلو دا مؤكد اصله مش كلابي خالص\nحنرجعه خلاص\nدا مالوش حد واحنا اتبنيناه\nانتي ناسية اوهانا؟\nهو ما بقولوش معانا كتير\nولا انا\nبابا قال اوهانا يعني العيلة\nاوهانا معناها العيلة\nوالعيلة معناها ان محد..\nمحدش فيها بيتنسي\nاو\nنتخلى عنه\nليلو مزبوط\nبتغاظ لما تقولي اوهانا وتكسبيني\nامممم\nههه متخفش انا حخليك تنام جمبي",
   "speech": [
    [
     0.02,
@@ -1722,11 +1957,367 @@
     46.08
    ]
   ],
-  "timed": [],
+  "timed": [
+   {
+    "start": 0.58,
+    "end": 2.1,
+    "text": "ايه؟ بتعمل ايه؟",
+    "character": "c1"
+   },
+   {
+    "start": 2.39,
+    "end": 3.98,
+    "text": "بس بقا يا ستيتش",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 4.17,
+    "end": 5.01,
+    "text": "هيييييييي",
+    "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+    "characters": [
+     "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+    ]
+   },
+   {
+    "start": 5.04,
+    "end": 6.59,
+    "text": "(صوت معافرة)",
+    "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+    "characters": [
+     "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+    ]
+   },
+   {
+    "start": 7.89,
+    "end": 11.34,
+    "text": "بصي شكلو دا مؤكد اصله مش كلابي خالص",
+    "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+    "characters": [
+     "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+    ]
+   },
+   {
+    "start": 11.29,
+    "end": 13.28,
+    "text": "حنرجعه خلاص",
+    "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+    "characters": [
+     "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+    ]
+   },
+   {
+    "start": 13.09,
+    "end": 15.48,
+    "text": "دا مالوش حد واحنا اتبنيناه",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 15.71,
+    "end": 17.66,
+    "text": "انتي ناسية اوهانا؟",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 17.73,
+    "end": 19.53,
+    "text": "هو ما بقولوش معانا كتير",
+    "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+    "characters": [
+     "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+    ]
+   },
+   {
+    "start": 19.53,
+    "end": 20.58,
+    "text": "ولا انا",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 20.61,
+    "end": 22.73,
+    "text": "بابا قال اوهانا يعني العيلة",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 27.44,
+    "end": 29.1,
+    "text": "اوهانا معناها العيلة",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 29.2,
+    "end": 30.8,
+    "text": "والعيلة معناها ان محد..",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 30.46,
+    "end": 32.75,
+    "text": "محدش فيها بيتنسي",
+    "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+    "characters": [
+     "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+    ]
+   },
+   {
+    "start": 32.62,
+    "end": 33.56,
+    "text": "او",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 33.56,
+    "end": 34.95,
+    "text": "نتخلى عنه",
+    "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+    "characters": [
+     "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+    ]
+   },
+   {
+    "start": 35.0,
+    "end": 36.76,
+    "text": "ليلو مزبوط",
+    "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+    "characters": [
+     "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+    ]
+   },
+   {
+    "start": 37.18,
+    "end": 39.61,
+    "text": "بتغاظ لما تقولي اوهانا وتكسبيني",
+    "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+    "characters": [
+     "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+    ]
+   },
+   {
+    "start": 40.97,
+    "end": 42.33,
+    "text": "امممم",
+    "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+    "characters": [
+     "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+    ]
+   },
+   {
+    "start": 42.95,
+    "end": 46.78,
+    "text": "ههه متخفش انا حخليك تنام جمبي",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   }
+  ],
   "edit": {
    "source": "clips/اوهانا يعني العيلة.mp4",
    "trim": null,
-   "lines": null
+   "lines": [
+    {
+     "text": "ايه؟ بتعمل ايه؟",
+     "start": 0.584,
+     "end": 2.105,
+     "character": "c1"
+    },
+    {
+     "text": "بس بقا يا ستيتش",
+     "start": 2.39,
+     "end": 3.981,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "هيييييييي",
+     "start": 4.173,
+     "end": 5.014,
+     "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+     "characters": [
+      "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+     ]
+    },
+    {
+     "text": "(صوت معافرة)",
+     "start": 5.04,
+     "end": 6.589,
+     "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+     "characters": [
+      "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+     ]
+    },
+    {
+     "text": "بصي شكلو دا مؤكد اصله مش كلابي خالص",
+     "start": 7.887,
+     "end": 11.34,
+     "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+     "characters": [
+      "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+     ]
+    },
+    {
+     "text": "حنرجعه خلاص",
+     "start": 11.291,
+     "end": 13.281,
+     "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+     "characters": [
+      "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+     ]
+    },
+    {
+     "text": "دا مالوش حد واحنا اتبنيناه",
+     "start": 13.091,
+     "end": 15.477,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "انتي ناسية اوهانا؟",
+     "start": 15.706,
+     "end": 17.66,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "هو ما بقولوش معانا كتير",
+     "start": 17.726,
+     "end": 19.531,
+     "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+     "characters": [
+      "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+     ]
+    },
+    {
+     "text": "ولا انا",
+     "start": 19.531,
+     "end": 20.58,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "بابا قال اوهانا يعني العيلة",
+     "start": 20.609,
+     "end": 22.73,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "اوهانا معناها العيلة",
+     "start": 27.439,
+     "end": 29.1,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "والعيلة معناها ان محد..",
+     "start": 29.203,
+     "end": 30.799,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "محدش فيها بيتنسي",
+     "start": 30.462,
+     "end": 32.75,
+     "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+     "characters": [
+      "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+     ]
+    },
+    {
+     "text": "او",
+     "start": 32.615,
+     "end": 33.564,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "نتخلى عنه",
+     "start": 33.564,
+     "end": 34.949,
+     "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+     "characters": [
+      "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+     ]
+    },
+    {
+     "text": "ليلو مزبوط",
+     "start": 35.001,
+     "end": 36.758,
+     "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+     "characters": [
+      "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+     ]
+    },
+    {
+     "text": "بتغاظ لما تقولي اوهانا وتكسبيني",
+     "start": 37.176,
+     "end": 39.609,
+     "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+     "characters": [
+      "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+     ]
+    },
+    {
+     "text": "امممم",
+     "start": 40.967,
+     "end": 42.329,
+     "character": "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6",
+     "characters": [
+      "c-bba6fdfc-5ff8-4e63-962e-dc60c42ebbb6"
+     ]
+    },
+    {
+     "text": "ههه متخفش انا حخليك تنام جمبي",
+     "start": 42.953,
+     "end": 46.782,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    }
+   ]
   }
  },
  {
@@ -3154,80 +3745,247 @@
  {
   "id": "كاسكو",
   "title": "كاسكو",
-  "voices": 1,
+  "voices": 2,
   "characters": [
    {
     "id": "c1",
-    "name": "شخصية 1"
+    "name": "كاسكو"
+   },
+   {
+    "id": "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c",
+    "name": "العم"
    }
   ],
   "video": "clips/كاسكو.mp4",
   "bg": "processed/كاسكو.bg.mp3",
   "thumb": "processed/كاسكو.jpg",
-  "lines": "",
+  "lines": "ليه خاطرت بحياتي عشان واحد اناني زيك\nاااه؟؟\nطول عمري مقتنع ان الدنيا لسة بخير\nلكن انت اثبتلي العكس\nاهههو اههم اخص علي حسستني بالذنب لاما شريرة\nكان ممكن اسيبك تموت وساعتها كانت كل مشاكلي حتتحل\nصح! ودا يثبت انك فعلا غبي\nدافع عن نفسك\nوريني شطارتك\nااااااااااه\nااااااه",
   "speech": [
    [
-    0.0,
-    0.88
+    0.06,
+    18.08
    ],
    [
-    1.3,
-    2.36
+    18.48,
+    27.94
    ],
    [
-    4.2,
-    4.74
+    29.14,
+    29.62
    ],
    [
-    5.22,
-    5.76
-   ],
-   [
-    6.38,
-    6.58
-   ],
-   [
-    7.32,
-    9.1
-   ],
-   [
-    9.96,
-    12.74
-   ],
-   [
-    13.52,
-    13.86
-   ],
-   [
-    14.32,
-    19.62
-   ],
-   [
-    20.02,
-    21.34
-   ],
-   [
-    22.08,
-    49.96
-   ],
-   [
-    51.14,
-    51.96
-   ],
-   [
-    52.58,
-    52.84
-   ],
-   [
-    53.34,
-    53.86
+    31.32,
+    32.0
    ]
   ],
-  "timed": [],
+  "timed": [
+   {
+    "start": 0,
+    "end": 2.73,
+    "text": "ليه خاطرت بحياتي عشان واحد اناني زيك",
+    "character": "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c",
+    "characters": [
+     "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c"
+    ]
+   },
+   {
+    "start": 29.0,
+    "end": 30.05,
+    "text": "اااه؟؟",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 2.56,
+    "end": 5.0,
+    "text": "طول عمري مقتنع ان الدنيا لسة بخير",
+    "character": "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c",
+    "characters": [
+     "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c"
+    ]
+   },
+   {
+    "start": 5.0,
+    "end": 6.44,
+    "text": "لكن انت اثبتلي العكس",
+    "character": "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c",
+    "characters": [
+     "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c"
+    ]
+   },
+   {
+    "start": 6.44,
+    "end": 9.78,
+    "text": "اهههو اههم اخص علي حسستني بالذنب لاما شريرة",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 9.74,
+    "end": 13.33,
+    "text": "كان ممكن اسيبك تموت وساعتها كانت كل مشاكلي حتتحل",
+    "character": "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c",
+    "characters": [
+     "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c"
+    ]
+   },
+   {
+    "start": 13.21,
+    "end": 15.56,
+    "text": "صح! ودا يثبت انك فعلا غبي",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 15.4,
+    "end": 16.9,
+    "text": "دافع عن نفسك",
+    "character": "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c",
+    "characters": [
+     "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c"
+    ]
+   },
+   {
+    "start": 16.69,
+    "end": 17.98,
+    "text": "وريني شطارتك",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 18.28,
+    "end": 19.5,
+    "text": "ااااااااااه",
+    "character": "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c",
+    "characters": [
+     "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c"
+    ]
+   },
+   {
+    "start": 19.19,
+    "end": 21.22,
+    "text": "ااااااه",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   }
+  ],
   "edit": {
-   "source": "clips/كاسكو.mp4",
-   "trim": null,
-   "lines": null
+   "source": "originals/كاسكو.mp4",
+   "trim": {
+    "in": 22.017,
+    "out": 55.833
+   },
+   "lines": [
+    {
+     "text": "ليه خاطرت بحياتي عشان واحد اناني زيك",
+     "start": 22.017,
+     "end": 24.747,
+     "character": "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c",
+     "characters": [
+      "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c"
+     ]
+    },
+    {
+     "text": "اااه؟؟",
+     "start": 51.015,
+     "end": 52.068,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "طول عمري مقتنع ان الدنيا لسة بخير",
+     "start": 24.578,
+     "end": 27.014,
+     "character": "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c",
+     "characters": [
+      "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c"
+     ]
+    },
+    {
+     "text": "لكن انت اثبتلي العكس",
+     "start": 27.014,
+     "end": 28.454,
+     "character": "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c",
+     "characters": [
+      "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c"
+     ]
+    },
+    {
+     "text": "اهههو اههم اخص علي حسستني بالذنب لاما شريرة",
+     "start": 28.454,
+     "end": 31.798,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "كان ممكن اسيبك تموت وساعتها كانت كل مشاكلي حتتحل",
+     "start": 31.759,
+     "end": 35.345,
+     "character": "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c",
+     "characters": [
+      "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c"
+     ]
+    },
+    {
+     "text": "صح! ودا يثبت انك فعلا غبي",
+     "start": 35.232,
+     "end": 37.573,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "دافع عن نفسك",
+     "start": 37.416,
+     "end": null,
+     "character": "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c",
+     "characters": [
+      "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c"
+     ]
+    },
+    {
+     "text": "وريني شطارتك",
+     "start": 38.709,
+     "end": 40.0,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "ااااااااااه",
+     "start": 40.297,
+     "end": 41.521,
+     "character": "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c",
+     "characters": [
+      "c-a08c3bc2-9638-4308-bb8b-1a1e15d55d4c"
+     ]
+    },
+    {
+     "text": "ااااااه",
+     "start": 41.209,
+     "end": 43.241,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    }
+   ]
   }
  },
  {
@@ -3481,68 +4239,295 @@
  {
   "id": "لازم نترعب",
   "title": "لازم نترعب",
-  "voices": 1,
+  "voices": 3,
   "characters": [
    {
     "id": "c1",
-    "name": "شخصية 1"
+    "name": "الطفلة"
+   },
+   {
+    "id": "c-db6b86e6-9b1c-4698-9e26-9a47f380561f",
+    "name": "شلبي"
+   },
+   {
+    "id": "c-143c4d70-506e-4397-97b9-c89744b01b9a",
+    "name": "مارد"
    }
   ],
   "video": "clips/لازم نترعب.mp4",
   "bg": "processed/لازم نترعب.bg.mp3",
   "thumb": "processed/لازم نترعب.jpg",
-  "lines": "",
+  "lines": "يا خبر\nاااااااااااااه\nالبتاعة البتاعة (كلام غير مفهوم) جية هنا جية\nااااااااااااااااااااه\nااااااااااااااااه\nتعالي هنا تعالي هنا\nاههاهاهها\n(صوت حمل شي ثقيل)\nاووه لا لا لا لا لا سيبيهم سيبيهم\nدول كانوا مترتبين\nاوك خلاص خلاص مش مشكلة طول ما هي بعيدة عننا كله تمام\nاااااااااااااااااااااااااااه\nااااااااااااااااااي",
   "speech": [
    [
-    0.0,
-    5.4
+    0.02,
+    5.34
    ],
    [
-    5.98,
-    18.76
+    5.96,
+    18.74
    ],
    [
-    19.44,
-    25.12
+    19.4,
+    25.1
    ],
    [
-    25.52,
-    34.86
+    25.5,
+    34.84
    ],
    [
-    35.28,
-    36.3
+    35.26,
+    36.24
    ],
    [
-    36.72,
-    44.12
-   ],
-   [
-    44.58,
-    47.16
-   ],
-   [
-    47.68,
-    51.8
-   ],
-   [
-    54.78,
-    56.28
-   ],
-   [
-    58.26,
-    59.26
-   ],
-   [
-    59.72,
-    60.48
+    36.7,
+    40.1
    ]
   ],
-  "timed": [],
+  "timed": [
+   {
+    "start": 5.88,
+    "end": 6.92,
+    "text": "يا خبر",
+    "character": "c1"
+   },
+   {
+    "start": 6.71,
+    "end": 7.94,
+    "text": "اااااااااااااه",
+    "character": "c-db6b86e6-9b1c-4698-9e26-9a47f380561f",
+    "characters": [
+     "c-db6b86e6-9b1c-4698-9e26-9a47f380561f",
+     "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+    ]
+   },
+   {
+    "start": 7.87,
+    "end": 12.18,
+    "text": "البتاعة البتاعة (كلام غير مفهوم) جية هنا جية",
+    "character": "c-143c4d70-506e-4397-97b9-c89744b01b9a",
+    "characters": [
+     "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+    ]
+   },
+   {
+    "start": 12.96,
+    "end": 14.74,
+    "text": "ااااااااااااااااااااه",
+    "character": "c-db6b86e6-9b1c-4698-9e26-9a47f380561f",
+    "characters": [
+     "c-db6b86e6-9b1c-4698-9e26-9a47f380561f",
+     "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+    ]
+   },
+   {
+    "start": 19.36,
+    "end": 20.96,
+    "text": "ااااااااااااااااه",
+    "character": "c-db6b86e6-9b1c-4698-9e26-9a47f380561f",
+    "characters": [
+     "c-db6b86e6-9b1c-4698-9e26-9a47f380561f",
+     "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+    ]
+   },
+   {
+    "start": 22.04,
+    "end": 23.38,
+    "text": "تعالي هنا تعالي هنا",
+    "character": "c-143c4d70-506e-4397-97b9-c89744b01b9a",
+    "characters": [
+     "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+    ]
+   },
+   {
+    "start": 21.43,
+    "end": 23.45,
+    "text": "اههاهاهها",
+    "character": "c-db6b86e6-9b1c-4698-9e26-9a47f380561f",
+    "characters": [
+     "c-db6b86e6-9b1c-4698-9e26-9a47f380561f"
+    ]
+   },
+   {
+    "start": 23.51,
+    "end": 24.77,
+    "text": "(صوت حمل شي ثقيل)",
+    "character": "c-143c4d70-506e-4397-97b9-c89744b01b9a",
+    "characters": [
+     "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+    ]
+   },
+   {
+    "start": 25.9,
+    "end": 28.7,
+    "text": "اووه لا لا لا لا لا سيبيهم سيبيهم",
+    "character": "c-143c4d70-506e-4397-97b9-c89744b01b9a",
+    "characters": [
+     "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+    ]
+   },
+   {
+    "start": 28.7,
+    "end": 30.87,
+    "text": "دول كانوا مترتبين",
+    "character": "c-143c4d70-506e-4397-97b9-c89744b01b9a",
+    "characters": [
+     "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+    ]
+   },
+   {
+    "start": 31.01,
+    "end": 34.42,
+    "text": "اوك خلاص خلاص مش مشكلة طول ما هي بعيدة عننا كله تمام",
+    "character": "c-143c4d70-506e-4397-97b9-c89744b01b9a",
+    "characters": [
+     "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+    ]
+   },
+   {
+    "start": 35.15,
+    "end": 36.14,
+    "text": "اااااااااااااااااااااااااااه",
+    "character": "c-143c4d70-506e-4397-97b9-c89744b01b9a",
+    "characters": [
+     "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+    ]
+   },
+   {
+    "start": 37.23,
+    "end": 38.9,
+    "text": "ااااااااااااااااااي",
+    "character": "c-143c4d70-506e-4397-97b9-c89744b01b9a",
+    "characters": [
+     "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+    ]
+   }
+  ],
   "edit": {
-   "source": "clips/لازم نترعب.mp4",
-   "trim": null,
-   "lines": null
+   "source": "originals/لازم نترعب.mp4",
+   "trim": {
+    "in": 0.0,
+    "out": 40.121
+   },
+   "lines": [
+    {
+     "text": "يا خبر",
+     "start": 5.876,
+     "end": 6.921,
+     "character": "c1"
+    },
+    {
+     "text": "اااااااااااااه",
+     "start": 6.714,
+     "end": 7.94,
+     "character": "c-db6b86e6-9b1c-4698-9e26-9a47f380561f",
+     "characters": [
+      "c-db6b86e6-9b1c-4698-9e26-9a47f380561f",
+      "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+     ]
+    },
+    {
+     "text": "البتاعة البتاعة (كلام غير مفهوم) جية هنا جية",
+     "start": 7.873,
+     "end": 12.181,
+     "character": "c-143c4d70-506e-4397-97b9-c89744b01b9a",
+     "characters": [
+      "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+     ]
+    },
+    {
+     "text": "ااااااااااااااااااااه",
+     "start": 12.961,
+     "end": 14.737,
+     "character": "c-db6b86e6-9b1c-4698-9e26-9a47f380561f",
+     "characters": [
+      "c-db6b86e6-9b1c-4698-9e26-9a47f380561f",
+      "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+     ]
+    },
+    {
+     "text": "ااااااااااااااااه",
+     "start": 19.359,
+     "end": 20.959,
+     "character": "c-db6b86e6-9b1c-4698-9e26-9a47f380561f",
+     "characters": [
+      "c-db6b86e6-9b1c-4698-9e26-9a47f380561f",
+      "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+     ]
+    },
+    {
+     "text": "تعالي هنا تعالي هنا",
+     "start": 22.039,
+     "end": 23.381,
+     "character": "c-143c4d70-506e-4397-97b9-c89744b01b9a",
+     "characters": [
+      "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+     ]
+    },
+    {
+     "text": "اههاهاهها",
+     "start": 21.427,
+     "end": 23.447,
+     "character": "c-db6b86e6-9b1c-4698-9e26-9a47f380561f",
+     "characters": [
+      "c-db6b86e6-9b1c-4698-9e26-9a47f380561f"
+     ]
+    },
+    {
+     "text": "(صوت حمل شي ثقيل)",
+     "start": 23.508,
+     "end": 24.773,
+     "character": "c-143c4d70-506e-4397-97b9-c89744b01b9a",
+     "characters": [
+      "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+     ]
+    },
+    {
+     "text": "اووه لا لا لا لا لا سيبيهم سيبيهم",
+     "start": 25.902,
+     "end": 28.699,
+     "character": "c-143c4d70-506e-4397-97b9-c89744b01b9a",
+     "characters": [
+      "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+     ]
+    },
+    {
+     "text": "دول كانوا مترتبين",
+     "start": 28.699,
+     "end": 30.867,
+     "character": "c-143c4d70-506e-4397-97b9-c89744b01b9a",
+     "characters": [
+      "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+     ]
+    },
+    {
+     "text": "اوك خلاص خلاص مش مشكلة طول ما هي بعيدة عننا كله تمام",
+     "start": 31.006,
+     "end": 34.423,
+     "character": "c-143c4d70-506e-4397-97b9-c89744b01b9a",
+     "characters": [
+      "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+     ]
+    },
+    {
+     "text": "اااااااااااااااااااااااااااه",
+     "start": 35.145,
+     "end": 36.137,
+     "character": "c-143c4d70-506e-4397-97b9-c89744b01b9a",
+     "characters": [
+      "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+     ]
+    },
+    {
+     "text": "ااااااااااااااااااي",
+     "start": 37.23,
+     "end": 38.9,
+     "character": "c-143c4d70-506e-4397-97b9-c89744b01b9a",
+     "characters": [
+      "c-143c4d70-506e-4397-97b9-c89744b01b9a"
+     ]
+    }
+   ]
   }
  },
  {
