@@ -475,17 +475,33 @@
  {
   "id": "Riley's new home",
   "title": "Riley's new home",
-  "voices": 1,
+  "voices": 5,
   "characters": [
    {
     "id": "c1",
-    "name": "شخصية 1"
+    "name": "Joy"
+   },
+   {
+    "id": "c-87446211-f10d-4fbf-99d9-04df2b206f95",
+    "name": "Anger"
+   },
+   {
+    "id": "c-8402016c-684f-42b6-ab17-ed221ad4d45d",
+    "name": "Disgust"
+   },
+   {
+    "id": "c-9c341969-d461-48ff-8f92-0712e989f4e6",
+    "name": "Fear"
+   },
+   {
+    "id": "c-b410e79b-f36f-4505-ac86-ee257facf106",
+    "name": "Sadness"
    }
   ],
   "video": "clips/Riley's new home.mp4",
   "bg": "processed/Riley's new home.bg.mp3",
   "thumb": "processed/Riley's new home.jpg",
-  "lines": "",
+  "lines": "there it is.. there is our new house annnnd\nmaybe it's nice on the inside\nwe're supposed to live here?h\nooh we have to?o\ni'm telling you it smells like something died in here\ncan you die from moving?g\nguys you're overreacting\nnobody is dyin...g\na dead mouse!!e\naaaaaaaaaaaaaaaaaah\ngreat\ni'm gonna be sick\nit's the house of the dead what are gonna do?o\nwe're gonna get raibies\nGet off of me!!e\nhey hey hey all through the drive dad talked about\nhow cool our new room is\nlet's go check it out\nit's gonna be graet\nok let's go\nyes yes yes yes yes\nnoo no no no no\ni'm starting to envy the dead mouse\nget out the rubber ball we're in solitary confinement\nriley can't live here\nohh(disgust) it's the worst it's absolutly the worst it's the worst place i've ever been in my entire life\nshe's right\nit's really bad\nthis house stinks",
   "speech": [
    [
     1.06,
@@ -524,11 +540,529 @@
     50.82
    ]
   ],
-  "timed": [],
+  "timed": [
+   {
+    "start": 0.89,
+    "end": 4.25,
+    "text": "there it is.. there is our new house annnnd",
+    "character": "c1"
+   },
+   {
+    "start": 10.47,
+    "end": 12.77,
+    "text": "maybe it's nice on the inside",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 18.0,
+    "end": 19.61,
+    "text": "we're supposed to live here?h",
+    "character": "c-87446211-f10d-4fbf-99d9-04df2b206f95",
+    "characters": [
+     "c-87446211-f10d-4fbf-99d9-04df2b206f95"
+    ]
+   },
+   {
+    "start": 19.17,
+    "end": 20.55,
+    "text": "ooh we have to?o",
+    "character": "c-b410e79b-f36f-4505-ac86-ee257facf106",
+    "characters": [
+     "c-b410e79b-f36f-4505-ac86-ee257facf106"
+    ]
+   },
+   {
+    "start": 19.96,
+    "end": 22.28,
+    "text": "i'm telling you it smells like something died in here",
+    "character": "c-8402016c-684f-42b6-ab17-ed221ad4d45d",
+    "characters": [
+     "c-8402016c-684f-42b6-ab17-ed221ad4d45d"
+    ]
+   },
+   {
+    "start": 22.13,
+    "end": 23.27,
+    "text": "can you die from moving?g",
+    "character": "c-9c341969-d461-48ff-8f92-0712e989f4e6",
+    "characters": [
+     "c-9c341969-d461-48ff-8f92-0712e989f4e6"
+    ]
+   },
+   {
+    "start": 23.23,
+    "end": 24.81,
+    "text": "guys you're overreacting",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 24.75,
+    "end": 26.34,
+    "text": "nobody is dyin...g",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 25.99,
+    "end": 27.11,
+    "text": "a dead mouse!!e",
+    "character": "c-8402016c-684f-42b6-ab17-ed221ad4d45d",
+    "characters": [
+     "c-8402016c-684f-42b6-ab17-ed221ad4d45d"
+    ]
+   },
+   {
+    "start": 26.93,
+    "end": 27.66,
+    "text": "aaaaaaaaaaaaaaaaaah",
+    "character": "c-9c341969-d461-48ff-8f92-0712e989f4e6",
+    "characters": [
+     "c-9c341969-d461-48ff-8f92-0712e989f4e6"
+    ]
+   },
+   {
+    "start": 27.41,
+    "end": 27.9,
+    "text": "great",
+    "character": "c-87446211-f10d-4fbf-99d9-04df2b206f95",
+    "characters": [
+     "c-87446211-f10d-4fbf-99d9-04df2b206f95"
+    ]
+   },
+   {
+    "start": 27.66,
+    "end": 28.45,
+    "text": "i'm gonna be sick",
+    "character": "c-8402016c-684f-42b6-ab17-ed221ad4d45d",
+    "characters": [
+     "c-8402016c-684f-42b6-ab17-ed221ad4d45d"
+    ]
+   },
+   {
+    "start": 28.14,
+    "end": 29.77,
+    "text": "it's the house of the dead what are gonna do?o",
+    "character": "c-9c341969-d461-48ff-8f92-0712e989f4e6",
+    "characters": [
+     "c-9c341969-d461-48ff-8f92-0712e989f4e6"
+    ]
+   },
+   {
+    "start": 29.54,
+    "end": 30.8,
+    "text": "we're gonna get raibies",
+    "character": "c-9c341969-d461-48ff-8f92-0712e989f4e6",
+    "characters": [
+     "c-9c341969-d461-48ff-8f92-0712e989f4e6"
+    ]
+   },
+   {
+    "start": 30.39,
+    "end": 31.84,
+    "text": "Get off of me!!e",
+    "character": "c-87446211-f10d-4fbf-99d9-04df2b206f95",
+    "characters": [
+     "c-87446211-f10d-4fbf-99d9-04df2b206f95"
+    ]
+   },
+   {
+    "start": 32.25,
+    "end": 34.33,
+    "text": "hey hey hey all through the drive dad talked about",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 34.33,
+    "end": 35.93,
+    "text": "how cool our new room is",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 35.98,
+    "end": 37.16,
+    "text": "let's go check it out",
+    "character": "c1",
+    "characters": [
+     "c1"
+    ]
+   },
+   {
+    "start": 36.91,
+    "end": 37.86,
+    "text": "it's gonna be graet",
+    "character": "c-87446211-f10d-4fbf-99d9-04df2b206f95",
+    "characters": [
+     "c-87446211-f10d-4fbf-99d9-04df2b206f95"
+    ]
+   },
+   {
+    "start": 36.82,
+    "end": 37.7,
+    "text": "ok let's go",
+    "character": "c-8402016c-684f-42b6-ab17-ed221ad4d45d",
+    "characters": [
+     "c-8402016c-684f-42b6-ab17-ed221ad4d45d"
+    ]
+   },
+   {
+    "start": 37.68,
+    "end": 39.01,
+    "text": "yes yes yes yes yes",
+    "character": "c-9c341969-d461-48ff-8f92-0712e989f4e6",
+    "characters": [
+     "c-9c341969-d461-48ff-8f92-0712e989f4e6"
+    ]
+   },
+   {
+    "start": 39.01,
+    "end": 40.25,
+    "text": "noo no no no no",
+    "character": "c-9c341969-d461-48ff-8f92-0712e989f4e6",
+    "characters": [
+     "c-9c341969-d461-48ff-8f92-0712e989f4e6"
+    ]
+   },
+   {
+    "start": 40.08,
+    "end": 41.75,
+    "text": "i'm starting to envy the dead mouse",
+    "character": "c-8402016c-684f-42b6-ab17-ed221ad4d45d",
+    "characters": [
+     "c-8402016c-684f-42b6-ab17-ed221ad4d45d"
+    ]
+   },
+   {
+    "start": 41.65,
+    "end": 44.52,
+    "text": "get out the rubber ball we're in solitary confinement",
+    "character": "c-87446211-f10d-4fbf-99d9-04df2b206f95",
+    "characters": [
+     "c-87446211-f10d-4fbf-99d9-04df2b206f95"
+    ]
+   },
+   {
+    "start": 43.8,
+    "end": 45.8,
+    "text": "riley can't live here",
+    "character": "c-b410e79b-f36f-4505-ac86-ee257facf106",
+    "characters": [
+     "c-b410e79b-f36f-4505-ac86-ee257facf106"
+    ]
+   },
+   {
+    "start": 44.64,
+    "end": 50.53,
+    "text": "ohh(disgust) it's the worst it's absolutly the worst it's the worst place i've ever been in my entire life",
+    "character": "c-8402016c-684f-42b6-ab17-ed221ad4d45d",
+    "characters": [
+     "c-8402016c-684f-42b6-ab17-ed221ad4d45d"
+    ]
+   },
+   {
+    "start": 45.31,
+    "end": 45.84,
+    "text": "she's right",
+    "character": "c-87446211-f10d-4fbf-99d9-04df2b206f95",
+    "characters": [
+     "c-87446211-f10d-4fbf-99d9-04df2b206f95"
+    ]
+   },
+   {
+    "start": 45.78,
+    "end": 46.76,
+    "text": "it's really bad",
+    "character": "c-9c341969-d461-48ff-8f92-0712e989f4e6",
+    "characters": [
+     "c-9c341969-d461-48ff-8f92-0712e989f4e6"
+    ]
+   },
+   {
+    "start": 47.51,
+    "end": 48.69,
+    "text": "this house stinks",
+    "character": "c-87446211-f10d-4fbf-99d9-04df2b206f95",
+    "characters": [
+     "c-87446211-f10d-4fbf-99d9-04df2b206f95"
+    ]
+   }
+  ],
   "edit": {
    "source": "clips/Riley's new home.mp4",
    "trim": null,
-   "lines": null
+   "lines": [
+    {
+     "text": "there it is.. there is our new house annnnd",
+     "start": 0.894,
+     "end": 4.255,
+     "character": "c1"
+    },
+    {
+     "text": "maybe it's nice on the inside",
+     "start": 10.47,
+     "end": 12.766,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "we're supposed to live here?h",
+     "start": 18.001,
+     "end": 19.613,
+     "character": "c-87446211-f10d-4fbf-99d9-04df2b206f95",
+     "characters": [
+      "c-87446211-f10d-4fbf-99d9-04df2b206f95"
+     ]
+    },
+    {
+     "text": "ooh we have to?o",
+     "start": 19.168,
+     "end": 20.552,
+     "character": "c-b410e79b-f36f-4505-ac86-ee257facf106",
+     "characters": [
+      "c-b410e79b-f36f-4505-ac86-ee257facf106"
+     ]
+    },
+    {
+     "text": "i'm telling you it smells like something died in here",
+     "start": 19.961,
+     "end": 22.284,
+     "character": "c-8402016c-684f-42b6-ab17-ed221ad4d45d",
+     "characters": [
+      "c-8402016c-684f-42b6-ab17-ed221ad4d45d"
+     ]
+    },
+    {
+     "text": "can you die from moving?g",
+     "start": 22.131,
+     "end": 23.267,
+     "character": "c-9c341969-d461-48ff-8f92-0712e989f4e6",
+     "characters": [
+      "c-9c341969-d461-48ff-8f92-0712e989f4e6"
+     ]
+    },
+    {
+     "text": "guys you're overreacting",
+     "start": 23.234,
+     "end": 24.81,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "nobody is dyin...g",
+     "start": 24.748,
+     "end": 26.34,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "a dead mouse!!e",
+     "start": 25.988,
+     "end": 27.108,
+     "character": "c-8402016c-684f-42b6-ab17-ed221ad4d45d",
+     "characters": [
+      "c-8402016c-684f-42b6-ab17-ed221ad4d45d"
+     ]
+    },
+    {
+     "text": "aaaaaaaaaaaaaaaaaah",
+     "start": 26.926,
+     "end": 27.662,
+     "character": "c-9c341969-d461-48ff-8f92-0712e989f4e6",
+     "characters": [
+      "c-9c341969-d461-48ff-8f92-0712e989f4e6"
+     ]
+    },
+    {
+     "text": "great",
+     "start": 27.409,
+     "end": 27.897,
+     "character": "c-87446211-f10d-4fbf-99d9-04df2b206f95",
+     "characters": [
+      "c-87446211-f10d-4fbf-99d9-04df2b206f95"
+     ]
+    },
+    {
+     "text": "i'm gonna be sick",
+     "start": 27.66,
+     "end": 28.449,
+     "character": "c-8402016c-684f-42b6-ab17-ed221ad4d45d",
+     "characters": [
+      "c-8402016c-684f-42b6-ab17-ed221ad4d45d"
+     ]
+    },
+    {
+     "text": "it's the house of the dead what are gonna do?o",
+     "start": 28.141,
+     "end": 29.775,
+     "character": "c-9c341969-d461-48ff-8f92-0712e989f4e6",
+     "characters": [
+      "c-9c341969-d461-48ff-8f92-0712e989f4e6"
+     ]
+    },
+    {
+     "text": "we're gonna get raibies",
+     "start": 29.54,
+     "end": 30.804,
+     "character": "c-9c341969-d461-48ff-8f92-0712e989f4e6",
+     "characters": [
+      "c-9c341969-d461-48ff-8f92-0712e989f4e6"
+     ]
+    },
+    {
+     "text": "Get off of me!!e",
+     "start": 30.386,
+     "end": 31.835,
+     "character": "c-87446211-f10d-4fbf-99d9-04df2b206f95",
+     "characters": [
+      "c-87446211-f10d-4fbf-99d9-04df2b206f95"
+     ]
+    },
+    {
+     "text": "hey hey hey all through the drive dad talked about",
+     "start": 32.249,
+     "end": 34.328,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "how cool our new room is",
+     "start": 34.328,
+     "end": 35.933,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "let's go check it out",
+     "start": 35.983,
+     "end": 37.159,
+     "character": "c1",
+     "characters": [
+      "c1"
+     ]
+    },
+    {
+     "text": "it's gonna be graet",
+     "start": 36.909,
+     "end": 37.859,
+     "character": "c-87446211-f10d-4fbf-99d9-04df2b206f95",
+     "characters": [
+      "c-87446211-f10d-4fbf-99d9-04df2b206f95"
+     ]
+    },
+    {
+     "text": "ok let's go",
+     "start": 36.821,
+     "end": 37.696,
+     "character": "c-8402016c-684f-42b6-ab17-ed221ad4d45d",
+     "characters": [
+      "c-8402016c-684f-42b6-ab17-ed221ad4d45d"
+     ]
+    },
+    {
+     "text": "yes yes yes yes yes",
+     "start": 37.678,
+     "end": 39.011,
+     "character": "c-9c341969-d461-48ff-8f92-0712e989f4e6",
+     "characters": [
+      "c-9c341969-d461-48ff-8f92-0712e989f4e6"
+     ]
+    },
+    {
+     "text": "noo no no no no",
+     "start": 39.011,
+     "end": 40.251,
+     "character": "c-9c341969-d461-48ff-8f92-0712e989f4e6",
+     "characters": [
+      "c-9c341969-d461-48ff-8f92-0712e989f4e6"
+     ]
+    },
+    {
+     "text": "i'm starting to envy the dead mouse",
+     "start": 40.08,
+     "end": 41.749,
+     "character": "c-8402016c-684f-42b6-ab17-ed221ad4d45d",
+     "characters": [
+      "c-8402016c-684f-42b6-ab17-ed221ad4d45d"
+     ]
+    },
+    {
+     "text": "get out the rubber ball we're in solitary confinement",
+     "start": 41.654,
+     "end": 44.522,
+     "character": "c-87446211-f10d-4fbf-99d9-04df2b206f95",
+     "characters": [
+      "c-87446211-f10d-4fbf-99d9-04df2b206f95"
+     ]
+    },
+    {
+     "text": "riley can't live here",
+     "start": 43.804,
+     "end": 45.804,
+     "character": "c-b410e79b-f36f-4505-ac86-ee257facf106",
+     "characters": [
+      "c-b410e79b-f36f-4505-ac86-ee257facf106"
+     ]
+    },
+    {
+     "text": "ohh(disgust) it's the worst it's absolutly the worst it's the worst place i've ever been in my entire life",
+     "start": 44.643,
+     "end": 50.533,
+     "character": "c-8402016c-684f-42b6-ab17-ed221ad4d45d",
+     "characters": [
+      "c-8402016c-684f-42b6-ab17-ed221ad4d45d"
+     ]
+    },
+    {
+     "text": "she's right",
+     "start": 45.313,
+     "end": 45.841,
+     "character": "c-87446211-f10d-4fbf-99d9-04df2b206f95",
+     "characters": [
+      "c-87446211-f10d-4fbf-99d9-04df2b206f95"
+     ]
+    },
+    {
+     "text": "it's really bad",
+     "start": 45.776,
+     "end": 46.763,
+     "character": "c-9c341969-d461-48ff-8f92-0712e989f4e6",
+     "characters": [
+      "c-9c341969-d461-48ff-8f92-0712e989f4e6"
+     ]
+    },
+    {
+     "text": "this house stinks",
+     "start": 47.512,
+     "end": 48.688,
+     "character": "c-87446211-f10d-4fbf-99d9-04df2b206f95",
+     "characters": [
+      "c-87446211-f10d-4fbf-99d9-04df2b206f95"
+     ]
+    }
+   ]
   }
  },
  {
